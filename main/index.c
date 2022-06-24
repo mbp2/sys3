@@ -1,8 +1,8 @@
 #include "shell.h"
 
 void kernelMain(void) {
-   shell_init();
+   sh_init();
 
-   shell_writeString("Hello world!\n");
+   sh_writeString("Hello world!");
    return;
 }

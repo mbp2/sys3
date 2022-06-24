@@ -6,7 +6,7 @@
 #ifndef VGA_H
 #define VGA_H
 
-#include "defs.h"
+#include<stdint.h>
  
 typedef enum vga {
    VGA_BLACK = 0,
