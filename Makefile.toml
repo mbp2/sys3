@@ -9,15 +9,15 @@ X86_C_FLAGS = [
   "-ffreestanding",
   "-nostdlib",
   "-nostartfiles",
-  "-target x86_64_none_elf"
-  "-march x86_64"
+  "-target x86_64_none_elf",
+  "-march x86_64",
 ]
 ARM_C_FLAGS = [
   "-ffreestanding",
   "-nostdlib",
   "-nostartfiles",
-  "-target armv8-none-eabi"
-  "-march arm64"
+  "-target armv8-none-eabi",
+  "-march arm64",
 ]
 
 [env.development]
@@ -37,7 +37,6 @@ args = [
 [tasks.format]
 command = "clang-format"
 args = [
-  "--style=file",
   "${@}",
 ]
 
@@ -58,7 +57,7 @@ args = [
   "-o jwff_sys3.bin",
   "jwff_febl.o",
   "jwff_kernel.o",
-  "${X86_C_FLAGS}"
+  "${X86_C_FLAGS}",
 ]
 dependencies = [
   "format_src",
@@ -75,7 +74,7 @@ args = [
   "${X86_C_FLAGS}",
 ]
 dependencies = [
-  "format_src"
+  "format_src",
 ]
 
 [tasks.build_asm_x86]
@@ -83,7 +82,7 @@ command = "clang"
 args = [
   "-o jwff_febl.o",
   "${X86_BTL_SOURCES}",
-  "${X86_C_FLAGS}"
+  "${X86_C_FLAGS}",
 ]
 
 # ARM64 BUILD INSTRUCTIONS
@@ -120,7 +119,7 @@ command = "clang"
 args = [
   "-o jwff_kernel.o",
   "${KERNEL_SOURCES}",
-  "${ARM_C_FLAGS}",+
+  "${ARM_C_FLAGS}",
 ]
 dependencies = [
   "format_src",
