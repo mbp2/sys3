@@ -1,0 +1,56 @@
+[env]
+PROJECT_ROOT = "${CWD}"
+X86_BTL_SOURCES = "${PROJECT_ROOT}/lib/boot/index.s"
+X86_KERNEL_SOURCES = { glob = "${PROJECT_ROOT}/main/*.c", include_files=true, include_dirs=false }
+
+[tasks.clean]
+command = "rm"
+args = [
+  "-r",
+  "--force",
+  "${PROJECT_ROOT}/build_*",
+]
+
+[tasks.format]
+command = ""
+
+[tasks.build_x86]
+command = "clang"
+args = [
+  "-T lib/linkers/x86Linker.ld",
+  "-o jwff_sys3.bin",
+  "jwff_febl.o",
+  "jwff_kernel.o",
+  "-ffreestanding",
+  "-nostdlib",
+  "-nostartfiles",
+]
+dependencies = [
+  "format",
+  "clean",
+  "build_asm_x86",
+  "build_kernel_x86",
+]
+
+[tasks.build_kernel_x86]
+command = "clang"
+args = [
+  "-o jwff_kernel.o",
+  "${X86_KERNEL_SOURCES}"
+  "-ffreestanding",
+  "-nostdlib",
+  "-nostartfiles",
+]
+dependencies = [
+  "format"
+]
+
+[tasks.build_asm_x86]
+command = "clang"
+args = [
+  "-o jwff_febl.o",
+  "${X86_BTL_SOURCES}"
+  "-ffreestanding",
+  "-nostdlib",
+  "-nostartfiles",
+]
