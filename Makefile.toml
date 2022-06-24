@@ -1,7 +1,15 @@
 [env]
+DEVELOPMENT = false
+RELEASE = false
 PROJECT_ROOT = "${CWD}"
 X86_BTL_SOURCES = "${PROJECT_ROOT}/lib/boot/index.s"
 X86_KERNEL_SOURCES = { glob = "${PROJECT_ROOT}/main/*.c", include_files=true, include_dirs=false }
+
+[env.development]
+DEVELOPMENT = true
+
+[env.release]
+RELEASE = true
 
 [tasks.clean]
 command = "rm"
