@@ -2,8 +2,23 @@
 DEVELOPMENT = false
 RELEASE = false
 PROJECT_ROOT = "${CWD}"
-X86_BTL_SOURCES = "${PROJECT_ROOT}/lib/boot/index.s"
+X86_BTL_SOURCES = "${PROJECT_ROOT}/lib/boot/x86/index.s"
 X86_KERNEL_SOURCES = { glob = "${PROJECT_ROOT}/main/*.c", include_files=true, include_dirs=false }
+ARM_BTL_SOURCES = "${PROJECT_ROOT}/lib/boot/arm/index.S"
+X86_C_FLAGS = [
+  "-ffreestanding",
+  "-nostdlib",
+  "-nostartfiles",
+  "-target x86_64_none_elf"
+  "-march x86_64"
+]
+ARM_C_FLAGS = [
+  "-ffreestanding",
+  "-nostdlib",
+  "-nostartfiles",
+  "-target armv8-none-eabi"
+  "-march arm64"
+]
 
 [env.development]
 DEVELOPMENT = true
@@ -20,7 +35,21 @@ args = [
 ]
 
 [tasks.format]
-command = ""
+command = "clang-format"
+args = [
+  "--style=file",
+  "${@}",
+]
+
+[tasks.format_src]
+command = "clang-format"
+args = [
+  "--style=file",
+  "main/*.c",
+  "lib/**/*.c",
+]
+
+# X86 BUILD INSTRUCTIONS
 
 [tasks.build_x86]
 command = "clang"
@@ -29,12 +58,10 @@ args = [
   "-o jwff_sys3.bin",
   "jwff_febl.o",
   "jwff_kernel.o",
-  "-ffreestanding",
-  "-nostdlib",
-  "-nostartfiles",
+  "${X86_C_FLAGS}"
 ]
 dependencies = [
-  "format",
+  "format_src",
   "clean",
   "build_asm_x86",
   "build_kernel_x86",
@@ -44,21 +71,57 @@ dependencies = [
 command = "clang"
 args = [
   "-o jwff_kernel.o",
-  "${X86_KERNEL_SOURCES}"
-  "-ffreestanding",
-  "-nostdlib",
-  "-nostartfiles",
+  "${X86_KERNEL_SOURCES}",
+  "${X86_C_FLAGS}",
 ]
 dependencies = [
-  "format"
+  "format_src"
 ]
 
 [tasks.build_asm_x86]
 command = "clang"
 args = [
   "-o jwff_febl.o",
-  "${X86_BTL_SOURCES}"
-  "-ffreestanding",
-  "-nostdlib",
-  "-nostartfiles",
+  "${X86_BTL_SOURCES}",
+  "${X86_C_FLAGS}"
+]
+
+# ARM64 BUILD INSTRUCTIONS
+
+[tasks.build_arm64]
+command = "clang"
+args = [
+  "-T lib/linkers/arm64Linker.ld",
+  "-o jwff_sys3.bin",
+  "jwff_febl.o",
+  "jwff_kernel.o",
+  "${ARM_C_FLAGS}",
+]
+dependencies = [
+  "format_src",
+  "clean",
+  "build_asm_arm64",
+  "build_kernel_arm64",
+]
+
+[tasks.build_asm_arm64]
+command = "clang"
+args = [
+  "-o jwff_febl.o",
+  "${ARM_BTL_SOURCES}",
+  "${ARM_C_FLAGS}",
+]
+dependencies = [
+  "format_src",
+]
+
+[tasks.build_kernel_arm64]
+command = "clang"
+args = [
+  "-o jwff_kernel.o",
+  "${KERNEL_SOURCES}",
+  "${ARM_C_FLAGS}",+
+]
+dependencies = [
+  "format_src",
 ]
