@@ -1,13 +1,8 @@
-OUTPUT_FORMAT(elf64-x86_64)
-
-/* The bootloader will look at this image and start execution at the symbol
-   designated as the entry point. */
+OUTPUT_FORMAT(elf64-littlearm)
+OUTPUT_ARCH(arm64)
 ENTRY(_start)
 
-/* Tell where the various sections of the object files will be put in the final
-   kernel image. */
-SECTIONS
-{
+SECTIONS {
    /* Begin putting sections at 1 MiB, a conventional place for kernels to be
       loaded at by the bootloader. */
    . = 1M;

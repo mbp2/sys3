@@ -29,7 +29,7 @@ _start:
   mov $stack_top, %esp
   
   # Call into our main function
-  call kernelMain
+  call kernel_start
   cli
 
 1:hlt

@@ -1,6 +1,6 @@
 #include "shell.h"
 
-void kernelMain(void) {
+extern void kernel_main(void) {
    sh_init();
 
    sh_writeString("Hello world!");
