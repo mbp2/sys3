@@ -1,9 +1,10 @@
 [env]
 DEVELOPMENT = false
 RELEASE = false
-PROJECT_ROOT = "${CWD}"
+PROJECT_ROOT = "."
 X86_BTL_SOURCES = "${PROJECT_ROOT}/lib/boot/index.s"
 X86_KERNEL_SOURCES = { glob = "${PROJECT_ROOT}/main/*.c", include_files=true, include_dirs=false }
+LIBC_SOURCES = { glob = "${PROJECT_ROOT}/lib/libc", include_files = true, include_dirs = false }
 
 [env.development]
 DEVELOPMENT = true
@@ -25,7 +26,7 @@ command = ""
 [tasks.build_x86]
 command = "clang"
 args = [
-  "-T lib/linkers/x86Linker.ld",
+  "-T lib/link/x86.link.ld",
   "-o jwff_sys3.bin",
   "jwff_febl.o",
   "jwff_kernel.o",
@@ -44,7 +45,7 @@ dependencies = [
 command = "clang"
 args = [
   "-o jwff_kernel.o",
-  "${X86_KERNEL_SOURCES}"
+  "${X86_KERNEL_SOURCES}",
   "-ffreestanding",
   "-nostdlib",
   "-nostartfiles",
@@ -57,7 +58,7 @@ dependencies = [
 command = "clang"
 args = [
   "-o jwff_febl.o",
-  "${X86_BTL_SOURCES}"
+  "${X86_BTL_SOURCES}",
   "-ffreestanding",
   "-nostdlib",
   "-nostartfiles",
