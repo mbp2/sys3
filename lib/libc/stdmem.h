@@ -1,5 +1,5 @@
-#ifndef _MEM_H
-#define _MEM_H 1
+#ifndef _STD_MEM_H
+#define _STD_MEM_H 1
 
 #include <sys/cdefs.h>
 #include <stddef.h>
@@ -17,4 +17,4 @@ void* memset(void*, int, size_t);
 }
 #endif//__cplusplus
 
-#endif//_MEM_H
+#endif//_STD_MEM_H
