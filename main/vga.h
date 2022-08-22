@@ -27,7 +27,7 @@ typedef enum vga {
    VGA_WHITE = 15,
 } VGA;
 
-static inline uint8_t vga_color(enum VGA fg, enum VGA bg);
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color);
+static inline uint8_t VgaColour(enum VGA fg, enum VGA bg);
+static inline uint16_t VgaEntry(unsigned char uc, uint8_t color);
 
 #endif//VGA_H

@@ -8,10 +8,10 @@
 extern "C" {
 #endif//__cplusplus
 
-int memcmp(const void*, const void*, size_t);
-void* memcpy(void* __restrict, const void* __restrict, size_t);
-void* memmove(void*, const void*, size_t);
-void* memset(void*, int, size_t);
+int MemCmp(const void*, const void*, size_t);
+void* MemCpy(void* __restrict, const void* __restrict, size_t);
+void* MemMove(void*, const void*, size_t);
+void* MemSet(void*, int, size_t);
 
 #ifdef __cplusplus
 }

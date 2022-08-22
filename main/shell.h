@@ -13,14 +13,14 @@ static const size_t SHELL_LENGTH = 25;
 
 size_t sh_cols;
 size_t sh_rows;
-uint8_t sh_color;
+uint8_t sh_colour;
 uint16_t* sh_buf;
 
-void sh_init(void);
-void sh_setColor(uint8_t color);
-void sh_putEntryAt(char c, uint8_t color, size_t x, size_t y); 
-void sh_putChar(char c);
-void sh_write(const char* data, size_t size); 
-void sh_writeString(const char* data);
+void ShInit(void);
+void ShSetColour(uint8_t);
+void ShPutEntryAt(char, uint8_t, size_t, size_t); 
+void ShPutChar(char);
+void ShWrite(const char*, size_t); 
+void ShWriteString(const char*);
 
 #endif//SHELL_H
