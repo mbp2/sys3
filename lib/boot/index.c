@@ -1,9 +1,9 @@
-extern void kernel_start(void) {
+void KernelStart(void) {
    extern {
-      void kernel_main(void);
+      void KernelMain(void);
    }
 
-   kernel_main();
+   KernelMain();
 
    return;
 }

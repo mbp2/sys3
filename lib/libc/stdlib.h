@@ -1,5 +1,5 @@
-#ifndef _STDLIB_H
-#define _STDLIB_H 1
+#ifndef LIBC_STDLIB_H
+#define LIBC_STDLIB_H 1
  
 #include <sys/cdefs.h>
  
@@ -14,4 +14,4 @@ void abort(void);
 }
 #endif
  
-#endif
+#endif//LIBC_STDLIB_H

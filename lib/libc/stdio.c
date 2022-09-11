@@ -2,13 +2,16 @@
 #include<stdarg.h>
 #include<stdbool.h>
 
-#include "stdio.h"
-#include "string.h"
-#include "uart.h"
+#include <libc/stdio.h>
+#include <libc/string.h>
+
+#if defined(__is_libKernel)
+#include <sys3/uart.h>
+#endif
 
 int PutChar(int cc) {
 #if defined(__is_libKernel)
-   u = UartInit(0x100000000)
+   struct Uart* u = UartInit(0x100000000)
    char c = (char)cc;
    UartWrite(u, &c, sizeof(c));
 #else

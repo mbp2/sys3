@@ -1,5 +1,5 @@
-#ifndef _MEM_H
-#define _MEM_H 1
+#ifndef LIBC_MEM_H
+#define LIBC_MEM_H 1
 
 #include <sys/cdefs.h>
 #include <stddef.h>
@@ -17,4 +17,4 @@ void* MemSet(void*, int, size_t);
 }
 #endif//__cplusplus
 
-#endif//_MEM_H
+#endif//LIBC_MEM_H

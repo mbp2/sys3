@@ -12,7 +12,7 @@ interrupt_vector_table:
 _start:
    .globl _start
    ldr sp, =stack+0x10000 @ Set up the stack.
-   bl kernel_start @ Jump to our entry
+   bl KernelStart @ Jump to our entry
 
 1:
    b 1b @ Halt.

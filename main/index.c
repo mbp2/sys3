@@ -1,8 +1,5 @@
-#include "shell.h"
+#include <sys3/uart.h>
 
-extern void kernel_main(void) {
-   sh_init();
-
-   sh_writeString("Hello world!");
-   return;
+void KernelMain(void) {
+   struct Uart* u = UartInit(0x100000000);
 }
