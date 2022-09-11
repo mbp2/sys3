@@ -6,6 +6,7 @@ KERNEL_SOURCES = { glob = "./main/**/*.c", include_files=true, include_dirs=fals
 X86_BTL_SOURCES = "./lib/boot/asm/x86_64.index.s"
 ARM_BTL_SOURCES = "./lib/boot/asm/arm64.index.s"
 X86_C_FLAGS = [
+  "--include-directory='./lib'",
   "-ffreestanding",
   "-nostdlib",
   "-nostartfiles",
@@ -13,6 +14,7 @@ X86_C_FLAGS = [
   "-march x86_64",
 ]
 ARM_C_FLAGS = [
+  "--include-directory='./lib'",
   "-ffreestanding",
   "-nostdlib",
   "-nostartfiles",
