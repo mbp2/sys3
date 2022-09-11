@@ -1,7 +1,7 @@
 #ifndef LIBC_STRING_H
 #define LIBC_STRING_H 1
 
-#include <sys/cdefs.h>
+#include <libc/sys/cdefs.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
