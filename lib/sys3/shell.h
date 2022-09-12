@@ -3,4 +3,6 @@
 
 #include <sys3/term/vga.h>
 
+
+
 #endif//SYS3_SHELL_H
