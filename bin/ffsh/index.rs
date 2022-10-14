@@ -10,9 +10,8 @@
 #![deny(clippy::all)]
 #![allow(non_snake_case)]
 
-#[main]
 #[doc(hidden)]
-fn Main() -> error::Result<()> {
+fn main() -> error::Result<()> {
    return Ok(());
 }
 
