@@ -2,8 +2,8 @@
 //
 // Defined in this file is an enum and a couple of functions.
 
-#ifndef SYS3_VGA_H
-#define SYS3_VGA_H 1
+#ifndef SYS3_SHELL_VGA_H
+#define SYS3_SHELL_VGA_H 1
 
 #include<stdint.h>
  
@@ -26,7 +26,13 @@ typedef enum vga {
    VGA_WHITE = 15,
 } VGA;
 
-static inline uint8_t VgaColour(enum VGA fg, enum VGA bg);
-static inline uint16_t VgaEntry(unsigned char uc, uint8_t color);
+static inline uint8_t VgaColour(enum VGA fg, enum VGA bg) {
+   return fg | bg << 4;
+}
 
-#endif//SYS3_VGA_H
+static inline uint16_t VgaEntry(unsigned char uc, uint8_t color) {
+   return (uint16_t) uc | (uint16_t) color << 8;
+}
+
+
+#endif//SYS3_SHELL_VGA_H
