@@ -6,10 +6,10 @@
 
 #include <stddef.h>
 
-typedef struct MallocInfo {
+typedef struct AllocInfo {
   int32_t addr;
   int32_t size;
-} MallocInfo;
+} AllocInfo;
 
 void* malloc(size_t size);
 void free(void* pointer);
