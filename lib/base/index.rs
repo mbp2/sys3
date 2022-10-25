@@ -3,3 +3,4 @@
 #![crate_name="base"]
 
 pub mod error;
+pub mod externs;
