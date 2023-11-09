@@ -1,0 +1,10 @@
+[package]
+description = "Foundation library for Trident 3"
+edition = "2021"
+name = "base"
+readme = "../readme.md"
+version = "0.0.0"
+
+[lib]
+name="base"
+path="index.rs"

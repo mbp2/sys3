@@ -31,11 +31,13 @@ void* malloc(size_t size) {
    for (index = 0; index < AllocatedNumber; index++) {
       if (metadata_info[index+1].address != 0){
          initial_gap = metadata_info[0].address - HeapBaseAddr;
+
          if (initial_gap >= size) {
             initial_flag = true;
             break;
          } else {
             gap = metadata_info[index + 1].address - (metadata_info[index].address + metadata_info[index].size);
+
             if (gap >= size) {
                flag = true;
                break;
@@ -48,13 +50,13 @@ void* malloc(size_t size) {
       heap_index = ((metadata_info[index].address + metadata_info[index].size) - HeapBaseAddr);
 
       for (j = MAX_ALLOC_ALLOWED - 1; j > index + 1; j--) {
-         MemCpy(&metadata_info[j], &metadata_info[j - 1], sizeof(AllocInfo));
+         memcpy(&metadata_info[j], &metadata_info[j - 1], sizeof(AllocInfo));
       }
    } else if (initial_flag == true) { /* Get index for allocating memory for case three. */
       heap_index = 0;
 
       for (j = MAX_ALLOC_ALLOWED - 1; j > index + 1; j--) {
-         MemCpy(&metadata_info[j], &metadata_info[j - 1], sizeof(AllocInfo));
+         memcpy(&metadata_info[j], &metadata_info[j - 1], sizeof(AllocInfo));
       }
    } else { /* Get Index for allocating memory for case one. */
       if (AllocatedNumber != 0) {
@@ -64,9 +66,9 @@ void* malloc(size_t size) {
       }
    }
 
-   address = &memory_stat[heap_index];
+   addr = &memory_stat[heap_index];
    metadata_info[index].address = HeapBaseAddr + heap_index;
    metadata_info[index].size = size;
 
-   return address;
+   return addr;
 }

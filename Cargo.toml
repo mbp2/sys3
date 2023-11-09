@@ -1,0 +1,9 @@
+[workspace]
+default-members = [
+   "main"
+]
+members = [
+   "main",
+   "bin/ffsh",
+   "lib/base"
+]

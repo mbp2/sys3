@@ -1,9 +1,5 @@
-void KernelStart(void) {
-   extern {
-      void KernelMain(void);
-   }
-
-   KernelMain();
-
+void kmain(void) {
+   extern void Main(void);
+   Main();
    return;
 }

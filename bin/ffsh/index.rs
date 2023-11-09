@@ -6,7 +6,6 @@
 // - Az
 
 #![no_std]
-#![no_main]
 #![deny(clippy::all)]
 #![allow(non_snake_case)]
 

@@ -4,10 +4,10 @@
 #define TRUE 1
 #define FALSE 0
 
-#include <stddef.h>
+#include <stdint.h>
 
 typedef struct AllocInfo {
-  int32_t addr;
+  int32_t address;
   int32_t size;
 } AllocInfo;
 

@@ -1,0 +1,19 @@
+[package]
+description = "An operating system for science!"
+edition = "2021"
+name = "trident3"
+readme = "../readme.md"
+version = "0.0.0"
+
+[lib]
+crate-type = ["staticlib"]
+name = "trident3_main"
+path = "index.rs"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]

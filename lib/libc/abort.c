@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
- 
+
 __attribute__((__noreturn__))
 void abort(void) {
 #if defined(__is_libKernel)
@@ -9,7 +9,7 @@ void abort(void) {
    asm volatile("hlt");
 #else
    // TODO: Abnormally terminate the process as if by SIGABRT.
-   Printf("abort()\n");
+   printf("abort()\n");
 #endif
    while (1) { }
    __builtin_unreachable();
