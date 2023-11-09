@@ -1,10 +1,10 @@
+#include <kernel/uart.h>
 #include<limits.h>
 #include<stdarg.h>
 #include<stdbool.h>
 
 #include "stdio.h"
 #include "string.h"
-#include "uart.h"
 
 int PutChar(int cc) {
 #if defined(__is_libKernel)
@@ -32,7 +32,7 @@ static bool Print(const char* data, size_t len) {
 
 int Printf(const char* restrict fmt, ...) {
    va_list params;
-   va_start(params, format);
+   va_start(params, fmt);
    
    int written = 0;
    
@@ -98,7 +98,7 @@ int Printf(const char* restrict fmt, ...) {
          written += len;
       } else {
          fmt = fmt_started;
-         size_t len = strlen(format);
+         size_t len = strlen(fmt);
          
          if(max < len) {
             // We'll have to come back here and set errno to EOVERFLOW.

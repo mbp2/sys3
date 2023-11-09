@@ -1,8 +1,8 @@
-#include "shell.h"
+#include <kernel/shell.h>
 
 extern void kernel_main(void) {
-   sh_init();
+   ShInit();
 
-   sh_writeString("Hello world!");
+   ShWriteString("Hello world!");
    return;
 }

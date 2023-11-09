@@ -1,7 +1,8 @@
-#include "uart.h"
+#include <kernel/uart.h>
 
-Uart* UartInit(size_t base) {
-   return Uart{ base };
+struct Uart* UartInit(size_t base) {
+   struct Uart* uart = { base };
+   return uart;
 }
 
 uint32_t UartRead(Uart* self, uint32_t offset) {
