@@ -1,5 +1,8 @@
-#include <sys3/uart.h>
+#include <kernel/uart.h>
 
-void KernelMain(void) {
-   struct Uart* u = UartInit(0x100000000);
+void Main(void) {
+   ShInit();
+
+   ShWriteString("Hello world!");
+   return;
 }

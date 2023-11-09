@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # gcc 8.2.0 x86_64-elf cross-compiler container
 # with Rust + Cargo cross-compilation setup
 
@@ -56,3 +57,18 @@ RUN apt-get install -y grub-pc-bin
 RUN apt-get install -y grub-common
 
 CMD ["/bin/bash"]
+=======
+FROM randomdude/gcc-cross-x86_64-elf
+
+RUN echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list
+
+RUN apt update
+RUN apt upgrade -y
+RUN apt install -y nasm
+RUN apt install -y xorriso
+RUN apt install -y grub-pc-bin
+RUN apt install -y grub-common
+
+VOLUME /root/env
+WORKDIR /root/env
+>>>>>>> post-2

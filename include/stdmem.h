@@ -1,5 +1,10 @@
+<<<<<<< HEAD:lib/libc/mem.h
 #ifndef LIBC_MEM_H
 #define LIBC_MEM_H 1
+=======
+#ifndef _STD_MEM_H
+#define _STD_MEM_H 1
+>>>>>>> post-2:include/stdmem.h
 
 #include <sys/cdefs.h>
 #include <stddef.h>
@@ -17,4 +22,8 @@ void* memset(void*, int, size_t);
 }
 #endif//__cplusplus
 
+<<<<<<< HEAD:lib/libc/mem.h
 #endif//LIBC_MEM_H
+=======
+#endif//_STD_MEM_H
+>>>>>>> post-2:include/stdmem.h

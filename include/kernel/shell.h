@@ -6,7 +6,10 @@
 #ifndef SHELL_H
 #define SHELL_H
 
+#include <string.h>
+
 #include <stdint.h>
+#include <stddef.h>
 
 static const size_t SHELL_WIDTH = 80;
 static const size_t SHELL_LENGTH = 25;

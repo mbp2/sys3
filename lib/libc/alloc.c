@@ -1,5 +1,5 @@
-#include <libc/alloc.h>
-#include <libc/mem.h>
+#include <alloc.h>
+#include <stdmem.h>
 
 #define MAX_ALLOC_ALLOWED 20
 

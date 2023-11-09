@@ -1,9 +1,15 @@
+#include <kernel/uart.h>
 #include<limits.h>
 #include<stdarg.h>
 #include<stdbool.h>
 
+<<<<<<< HEAD
 #include <libc/stdio.h>
 #include <libc/string.h>
+=======
+#include "stdio.h"
+#include "string.h"
+>>>>>>> post-2
 
 #if defined(__is_libKernel)
 #include <sys3/uart.h>
@@ -37,7 +43,11 @@ static bool print(const char* data, size_t len) {
 int printf(const char* restrict fmt, ...) {
    va_list params;
    va_start(params, fmt);
+<<<<<<< HEAD
 
+=======
+   
+>>>>>>> post-2
    int written = 0;
 
    while (*fmt != '\0') {
@@ -103,8 +113,13 @@ int printf(const char* restrict fmt, ...) {
       } else {
          fmt = fmt_started;
          size_t len = strlen(fmt);
+<<<<<<< HEAD
 
          if (max < len) {
+=======
+         
+         if(max < len) {
+>>>>>>> post-2
             // We'll have to come back here and set errno to EOVERFLOW.
             return -1;
          }
