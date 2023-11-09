@@ -1,4 +1,5 @@
 [package]
+build="build.rs"
 description = "Foundation library for Trident 3"
 edition = "2021"
 name = "base"

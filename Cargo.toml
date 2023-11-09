@@ -7,3 +7,6 @@ members = [
    "bin/ffsh",
    "lib/base"
 ]
+
+[workspace.dependencies]
+spin = { version = "0.9.8", features=["spin_mutex"] }
