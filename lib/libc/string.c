@@ -27,16 +27,16 @@ static inline unsigned long maskffs_(unsigned long x)
     return ((x & -x) >> 7) * acc >> (LSIZE*8-8);
 }
 
-size_t strlen(const char* base)
-{
-    union intptr p = { (char*) base };
-    unsigned long mask;
+size_t strlen(const char* base) {
+   union intptr p = { (char*) base };
+   unsigned long mask;
 
-    for ( ; !aligned_(p.c, LSIZE); p.c++ )
-        if (*p.c == 0)
-            return p.c - base;
+   for ( ; !aligned_(p.c, LSIZE); p.c++ )
+      if (*p.c == 0)
+         return p.c - base;
 
-    while ( !(mask = pzerobl_(*p.l)) )
-        p.l++;
-    return p.c - base + maskffs_(mask);
+   while ( !(mask = pzerobl_(*p.l)) )
+      p.l++;
+
+   return p.c - base + maskffs_(mask);
 }

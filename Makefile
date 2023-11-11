@@ -22,7 +22,7 @@ $(boot_object_files): build/boot/%.o : lib/boot/%.c
 
 $(x86_64_asm_object_files): build/boot/asm/%.o : lib/boot/asm/%.asm
 	mkdir -p $(dir $@) && \
-	x86_64-elf-gcc -f elf64 $(patsubst build/boot/asm/%.o, lib/boot/asm/%.asm, $@) -o $@
+	x86_64-elf-as -f elf64 $(patsubst build/boot/asm/%.o, lib/boot/asm/%.asm, $@) -o $@
 
 $(libc_object_files): build/libc/%.o : lib/libc/%.c
 	mkdir -p $(dir $@) && \
