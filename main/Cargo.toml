@@ -1,19 +1,12 @@
 [package]
-description = "An operating system for science!"
-edition = "2021"
-name = "trident3"
-readme = "../readme.md"
-version = "0.0.0"
+description = "Trident 3 kernel module"
+documentation.workspace = true
+edition.workspace = true
+name = "trident3-main"
+repository.workspace = true
+version.workspace = true
 
 [lib]
 crate-type = ["staticlib"]
-name = "trident3_main"
-path = "index.rs"
-
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
-
-[dependencies]
+name = "t3_main"
+path = "main/index.rs"

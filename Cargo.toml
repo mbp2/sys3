@@ -1,12 +1,32 @@
 [workspace]
+resolver = "2"
 default-members = [
-   "main"
+   "main",
+   "lib/boot"
 ]
 members = [
    "main",
    "bin/ffsh",
-   "lib/base"
+   "lib/base",
+   "lib/boot",
+   "lib/boot/bin/bios",
+   "lib/boot/bin/uefi"
 ]
 
+[workspace.package]
+description = "An experimental operating system, for science!"
+documentation = "https://mbp2.blog/src/@trident"
+edition = "2021"
+name = "trident3"
+repository = "https://github.com/azyklus/sys3"
+version = "3.0.1"
+
 [workspace.dependencies]
+base = { path = "./lib/base", version = "3.0.1" }
 spin = { version = "0.9.8", features=["spin_mutex"] }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

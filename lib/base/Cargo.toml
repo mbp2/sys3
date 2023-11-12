@@ -1,11 +1,14 @@
 [package]
 build="build.rs"
 description = "Foundation library for Trident 3"
-edition = "2021"
+edition.workspace = true
 name = "base"
 readme = "../readme.md"
-version = "0.0.0"
+version.workspace = true
 
 [lib]
 name="base"
 path="index.rs"
+
+[dependencies]
+spin.workspace = true

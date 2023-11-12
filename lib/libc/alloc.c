@@ -3,7 +3,7 @@
 
 #define MAX_ALLOC_ALLOWED 20
 
-extern size_t _heap_size;
+size_t _heap_size;
 
 static uint32_t AllocatedNumber = 0;
 static uint32_t HeapBaseAddr = 0x0;

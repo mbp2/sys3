@@ -1,7 +1,7 @@
 # gcc 13.2.0 x86_64-elf cross-compiler container
 # with Rust + Cargo cross-compilation setup
 
-FROM debian:trixie
+FROM rust:latest
 LABEL maintainer "Az33 <azyklus@disroot.org>"
 
 ARG BINUTILS_VERSION=2.41
@@ -18,6 +18,7 @@ RUN apt-get install -y bzip2
 RUN apt-get install -y curl
 RUN apt-get install -y flex
 RUN apt-get install -y gcc
+RUN apt-get install -y grub-common
 RUN apt-get install -y libgmp3-dev
 RUN apt-get install -y libmpc-dev
 RUN apt-get install -y libisl-dev
@@ -55,7 +56,10 @@ RUN set -x \
 	&& ./build-binutils.sh ${BINUTILS_VERSION} \
 	&& ./build-gcc.sh ${GCC_VERSION}
 
-CMD ["/bin/bash"]
+RUN set -x \
+	&& rustup toolchain install nightly
 
 VOLUME /root/env
 WORKDIR /root/env
+
+CMD ["/bin/bash"]
