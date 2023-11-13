@@ -24,8 +24,6 @@ INFO:
 
 The upstream kernel, bootloader, and lib(s) source tree can be found here.  
 
----
-
 # Usage
 
 TODO: Update this section when userland modules are created.
