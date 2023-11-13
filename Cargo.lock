@@ -32,6 +32,12 @@ checksum = "dc827186963e592360843fb5ba4b973e145841266c1357f7180c43526f2e5b61"
 
 [[package]]
 name = "bitflags"
+version = "1.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
+
+[[package]]
+name = "bitflags"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "327762f6e5a765692301e5bb513e0d9fef63be86bbc14528052b1cd3e6f03e07"
@@ -41,6 +47,21 @@ name = "byteorder"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+
+[[package]]
+name = "conquer-once"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c6d3a9775a69f6d1fe2cc888999b67ed30257d3da4d2af91984e722f2ec918a"
+dependencies = [
+ "conquer-util",
+]
+
+[[package]]
+name = "conquer-util"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e763eef8846b13b380f37dfecda401770b0ca4e56e95170237bd7c25c7db3582"
 
 [[package]]
 name = "critical-section"
@@ -94,6 +115,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
+name = "noto-sans-mono-bitmap"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a27daf9557165efe1d09b52f97393bf6283cadb0a76fbe64a1061e15553a994a"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -129,6 +156,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "rand"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
+dependencies = [
+ "rand_core",
+]
+
+[[package]]
+name = "rand_core"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
+
+[[package]]
+name = "rand_hc"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b363d4f6370f88d62bf586c80405657bde0f0e1b8945d47d2ad59b906cb4f54"
+dependencies = [
+ "rand_core",
+]
+
+[[package]]
+name = "raw-cpuid"
+version = "10.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c297679cb867470fa8c9f67dbba74a78d78e3e98d7cf2b08d6d71540f797332"
+dependencies = [
+ "bitflags 1.3.2",
 ]
 
 [[package]]
@@ -205,6 +265,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "spinning_top"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b9eb1a2f4c41445a3a0ff9abc5221c5fcd28e1f13cd7c0397706f9ac938ddb0"
+dependencies = [
+ "lock_api",
+]
+
+[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -234,7 +303,22 @@ dependencies = [
 
 [[package]]
 name = "trident3-bootloader"
-version = "0.1.0"
+version = "3.0.1"
+dependencies = [
+ "base",
+ "conquer-once",
+ "log",
+ "noto-sans-mono-bitmap",
+ "rand",
+ "rand_hc",
+ "raw-cpuid",
+ "serde",
+ "spinning_top",
+ "uart_16550",
+ "usize_conversions",
+ "x86_64",
+ "xmas-elf",
+]
 
 [[package]]
 name = "trident3-bootloader-efi"
@@ -262,6 +346,17 @@ name = "trident3-main"
 version = "3.0.1"
 
 [[package]]
+name = "uart_16550"
+version = "0.2.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "614ff2a87880d4bd4374722268598a970bbad05ced8bf630439417347254ab2e"
+dependencies = [
+ "bitflags 1.3.2",
+ "rustversion",
+ "x86_64",
+]
+
+[[package]]
 name = "ucs2"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -276,7 +371,7 @@ version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1cb8f384905087f56c2fdf90bb7d94d24c600775b9f40424a4b80882ba399d47"
 dependencies = [
- "bitflags",
+ "bitflags 2.4.1",
  "log",
  "ptr_meta",
  "ucs2",
@@ -302,7 +397,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8bbf45ee102da89ef37674dd5186cd766418338457e660e7a3a1bad64d122abf"
 dependencies = [
- "bitflags",
+ "bitflags 2.4.1",
  "ptr_meta",
  "uguid",
 ]
@@ -320,6 +415,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 
 [[package]]
+name = "usize_conversions"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f70329e2cbe45d6c97a5112daad40c34cd9a4e18edb5a2a18fefeb584d8d25e5"
+
+[[package]]
 name = "volatile"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -332,7 +433,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b835097a84e4457323331ec5d6eb23d096066cbfb215d54096dcb4b2e85f500"
 dependencies = [
  "bit_field",
- "bitflags",
+ "bitflags 2.4.1",
  "rustversion",
  "volatile",
 ]
+
+[[package]]
+name = "xmas-elf"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d29b4d8e7beaceb4e77447ba941a7600d23d0319ab52da0461abea214832d5a"
+dependencies = [
+ "zero",
+]
+
+[[package]]
+name = "zero"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fe21bcc34ca7fe6dd56cc2cb1261ea59d6b93620215aefb5ea6032265527784"
