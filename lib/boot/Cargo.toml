@@ -2,7 +2,7 @@
 build = "build.rs"
 description = "EFI- and BIOS-compatible bootloader for Trident 3"
 edition = "2021"
-name = "trident3-bootloader"
+name = "trident3-springboard"
 version.workspace = true
 
 [lib]

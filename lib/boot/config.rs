@@ -47,7 +47,7 @@ impl LoaderConfig {
    pub const fn new() -> Self {
       return LoaderConfig{
          kernelStackSize: 80 * 1024,
-         mappings: Mapping::new(),
+         mappings: Mappings::new(),
          version: ApiVersion::new_default(),
       };
    }
@@ -59,7 +59,7 @@ impl LoaderConfig {
          version,
       } = self;
 
-      let apiVersion{
+      let ApiVersion{
          major,
          minor,
          patch,
@@ -76,12 +76,12 @@ impl LoaderConfig {
          dynamicRangeStart,
          dynamicRangeEnd,
          ramdiskMemory,
-      } = Mappings;
+      } = mappings;
 
       let FrameBuffer{
          minHeight,
          minWidth,
-      } = FrameBuffer;
+      } = frameBuffer;
 
       let version = {
          let one = concat_2_2(major.to_le_bytes(), minor.to_le_bytes());
@@ -288,7 +288,7 @@ pub struct Mappings {
    pub bootInfo: Mapping,
    
    /// Specifies the mapping of the frame buffer memory region.
-   pub frameBuffer: Maping,
+   pub frameBuffer: Mapping,
 
    /// The bootloader supports to map the whole physical memory into the virtual address
    /// space at some offset. This is useful for accessing and modifying the page tables set

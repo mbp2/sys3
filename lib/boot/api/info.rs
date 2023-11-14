@@ -4,7 +4,7 @@
 /// have the following signature:
 ///
 /// ```
-/// # use bootloader_api::BootInfo;
+/// # use springboard::api::BootInfo;
 /// # type _SIGNATURE =
 /// extern "C" fn(boot_info: &'static mut BootInfo) -> !;
 /// ```
@@ -114,13 +114,13 @@ impl ops::Deref for MemoryRegions {
    type Target = [MemoryRegion];
 
    fn deref(&self) -> &Self::Target {
-      unsafe { slice::from_raw_parts(self.ptr, self.len) }
+      unsafe { slice::from_raw_parts(self.ptr, self.length) }
    }
 }
 
 impl ops::DerefMut for MemoryRegions {
    fn deref_mut(&mut self) -> &mut Self::Target {
-      unsafe { slice::from_raw_parts_mut(self.ptr, self.len) }
+      unsafe { slice::from_raw_parts_mut(self.ptr, self.length) }
    }
 }
 
@@ -135,7 +135,7 @@ impl From<&'static mut [MemoryRegion]> for MemoryRegions {
 
 impl From<MemoryRegions> for &'static mut [MemoryRegion] {
    fn from(regions: MemoryRegions) -> &'static mut [MemoryRegion] {
-      unsafe { slice::from_raw_parts_mut(regions.ptr, regions.len) }
+      unsafe { slice::from_raw_parts_mut(regions.ptr, regions.length) }
    }
 }
 

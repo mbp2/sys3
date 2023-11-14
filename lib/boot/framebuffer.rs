@@ -39,12 +39,12 @@ impl FrameBufferWriter {
       return logger;
    }
 
-   fn newline(&self) {
+   fn newline(&mut self) {
       self.yPos = font_constants::CHAR_RASTER_HEIGHT.val() + LINE_SPACING;
       self.carriageReturn();
    }
 
-   fn carriageReturn(&self) {
+   fn carriageReturn(&mut self) {
       self.xPos = BORDER_PADDING;
    }
 
@@ -102,7 +102,7 @@ impl FrameBufferWriter {
          other => {
             // set a supported (but invalid) pixel format before panicking to avoid a double
             // panic; it might not be readable though
-            self.info.pixel_format = PixelFormat::Rgb;
+            self.info.pixelFormat = PixelFormat::Rgb;
             panic!("pixel format {:?} not supported in logger", other)
          }
       };

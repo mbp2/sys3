@@ -104,7 +104,7 @@ where
    /// The return slice is a subslice of `regions`, shortened to the actual number of regions.
    pub fn ConstructMemoryMap(
       self,
-      regions: MaybeUninit<MemoryRegion>,
+      regions: &mut [MaybeUninit<MemoryRegion>],
       kernelSliceStart: PhysAddr,
       kernelSliceLength: u64,
    ) -> &mut [MemoryRegion] {
@@ -165,14 +165,14 @@ where
             assert!(
                kernelSliceStart >= region.start,
                "region overlaps with kernel, but kernel begins before region \
-               (kernelSliceStart: {kernelSliceStart: #x}, regionStart: {:#x})",
+               (kernelSliceStart: {kernelSliceStart:#x}, regionStart: {:#x})",
                region.start
             );
 
             assert!(
                kernelSliceEnd <= region.end,
                "region overlaps with kernel, but region ends before kernel \
-               (kernelSliceEnd: {kernelSliceEnd: #x}, regionEnd: {:#x})",
+               (kernelSliceEnd: {kernelSliceEnd:#x}, regionEnd: {:#x})",
                region.end
             );
 
@@ -198,7 +198,7 @@ where
             Self::addRegion(afterKernel, regions, &mut nextIndex);
          } else {
             // add the region normally
-            Self::add_region(region, regions, &mut next_index);
+            Self::add_region(region, regions, &mut nextIndex);
          }
       }
 
@@ -206,7 +206,7 @@ where
       unsafe {
          // inlined variant of: `MaybeUninit::slice_assume_init_mut(initialized)`
          // TODO: undo inlining when `slice_assume_init_mut` becomes stable
-         &mut *(initialized as *mut [_] as *mut [_])
+         &mut *(initialised as *mut [_] as *mut [_])
       }
    }
 

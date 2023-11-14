@@ -1,8 +1,9 @@
-//! # Trident bootloader
+//! # Springboard
 //! — A bootloader for the Trident system.
 #![allow(non_snake_case)]
 #![warn(missing_docs)]
 #![deny(missing_abi)]
+#![feature(step_trait)]
 #![no_std]
 
 pub const PAGE_SIZE: u64 = 4096;
@@ -17,13 +18,13 @@ pub fn LoadAndSwitchToKernel<I, D>(
 where
    I: ExactSizeIterator<Item = D> + Clone,
    D: LegacyMemoryRegion, {
-   let config = kernel.config;
+   let config = &kernel.config;
    let mut mappings = SetUpMappings(
       kernel,
       &mut frameAllocator,
       &mut pageTables,
       systemInfo.framebuffer.as_ref(),
-      &config,
+      config,
       &systemInfo,
    );
 
@@ -44,7 +45,7 @@ pub fn SetUpMappings<I, D>(
    frameAllocator: &mut LegacyFrameAllocator<I, D>,
    pageTables: &mut PageTables,
    framebuffer: Option<&RawPixelBufferInfo>,
-   config: &LoaderConfig,
+   config: &BootConfig,
    systemInfo: &SystemInfo,
 ) -> Mappings
    where
@@ -61,14 +62,77 @@ pub fn SetUpMappings<I, D>(
    );
 
    // Enable support for the no-execute bit in page tables.
-   EnableNxeBit();
+   enableNxeBit();
    // Make the kernel respect the write-protection bits even when in ring 0 by default
-   EnableWriteProtectBit();
+   enableWriteProtectBit();
 
-   let config = kernel.config;
+   let config = &kernel.config;
    let kernelSliceStart = PhysAddr::new(kernel.startAddress as _);
    let kernelSliceLength = u64::try_from(kernel.length).unwrap();
    //TODO: Finish
+}
+
+pub fn CreateBootInfo<I, D>(
+   config: &LoaderConfig,
+   bootConfig: &BootConfig,
+   mut frameAllocator: LegacyFrameAllocator<I, D>,
+   pageTables: &mut PageTables,
+   mappings: &mut Mappings,
+   systemInfo: SystemInfo,
+) -> &'static mut BootInfo
+   where
+      I: ExactSizeIterator<Item = D> + Clone,
+      D: LegacyMemoryRegion,
+{
+   log::info!("Allocate boot info!");
+}
+
+/// The memory addresses required for the context shift.
+pub struct Addresses {
+   pageTable: PhysFrame,
+   stackTop: VirtAddr,
+   entryPoint: VirtAddr,
+   bootInfo: &'static mut BootInfo,
+}
+
+fn mappingAddressPageAligned(
+   mapping: Mapping,
+   size: u64,
+   usedEntries: &mut UsedLevel4Entries,
+   kind: &str,
+) -> Page {
+   match mappingAddress(mapping, size, Size4KiB::SIZE, usedEntries) {
+      Ok(address) => Page::from_start_address(address).unwrap(),
+      Err(address) => panic!("{kind} address must be page-aligned (is `{address:?}`)"),
+   }
+}
+
+fn mappingAddress(
+   mapping: Mapping,
+   size: u64,
+   alignment: u64,
+   usedEntries: &mut UsedLevel4Entries
+) -> Result<VirtAddr, VirtAddr> {
+   let address = match mapping {
+      Mapping::Fixed(address) => VirtAddr::new(address),
+      Mapping::Dynamic => usedEntries.getFreeAddress(size, alignment),
+   };
+
+   return if address.is_aligned(alignment) {
+      Ok(address)
+   } else {
+      Err(address)
+   };
+}
+
+fn enableNxeBit() {
+   use x86_64::registers::control::{Efer, EferFlags};
+   unsafe { Efer::update(|efer| *efer |= EferFlags::NO_EXECUTE_ENABLE) }
+}
+
+fn enableWriteProtectBit() {
+   use x86_64::registers::control::{Cr0, Cr0Flags};
+   unsafe { Cr0::update(|cr0| *cr0 |= Cr0Flags::WRITE_PROTECT) }
 }
 
 /// Required system information that should be queried from the BIOS or UEFI firmware.
@@ -114,7 +178,7 @@ impl<'a> Kernel<'a> {
             .expect("kernel was compiled with incompatible springboard version")
       };
 
-      return Kernel {
+      return Kernel{
          elf: kernelElf,
          config,
          startAddress: kernelSlice.as_ptr(),
@@ -141,10 +205,11 @@ pub struct PageTables {
 
 // IMPORTS //
 
+use x86_64::registers::control::{Cr0, Efer};
 use {
    crate::{
       api::info::{BootInfo, PixelBuffer, PixelBufferInfo},
-      config::{BootConfig, LoaderConfig},
+      config::{BootConfig, LoaderConfig, Mappings, Mapping},
       legacy::{LegacyFrameAllocator, LegacyMemoryRegion},
       level4::UsedLevel4Entries,
    },
@@ -170,6 +235,14 @@ pub mod gdt;
 pub mod legacy;
 pub mod level4;
 pub mod loader;
+
+pub(crate) mod concat {
+   include!(concat!(env!("OUT_DIR"), "/concat.rs"));
+}
+
+pub(crate) mod version_info {
+   include!(concat!(env!("OUT_DIR"), "/version_info.rs"));
+}
 
 extern crate base;
 extern crate conquer_once;
