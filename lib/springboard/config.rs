@@ -23,7 +23,7 @@ pub struct LoaderConfig {
    pub(crate) version: ApiVersion,
 
    /// Configuration for (optional) page table mappings created by the bootloader.
-   pub mappings: Mappings,
+   pub mappings: BootMappings,
 
    /// The size of the stack that the bootloader should allocate for the kernel (in bytes).
    ///
@@ -47,7 +47,7 @@ impl LoaderConfig {
    pub const fn new() -> Self {
       return LoaderConfig{
          kernelStackSize: 80 * 1024,
-         mappings: Mappings::new(),
+         mappings: BootMappings::new(),
          version: ApiVersion::new_default(),
       };
    }
@@ -66,7 +66,7 @@ impl LoaderConfig {
          preRelease,
       } = version;
 
-      let Mappings{
+      let BootMappings {
          kernelStack,
          bootInfo,
          frameBuffer,
@@ -183,7 +183,7 @@ impl LoaderConfig {
          let (&dre, s) = splitArrayRef(s);
          let (&rdm, s) = splitArrayRef(s);
 
-         let mappings = Mappings{
+         let mappings = BootMappings {
             kernelStack: Mapping::Deserialise(&kernelStack)?,
             bootInfo: Mapping::Deserialise(&bootInfo)?,
             frameBuffer: Mapping::Deserialise(&frameBuffer)?,
@@ -272,7 +272,7 @@ impl Default for ApiVersion {
 }
 
 /// Allows to configure the virtual memory mappings created by the bootloader.
-pub struct Mappings {
+pub struct BootMappings {
    /// Configures how the kernel stack should be mapped.
    ///
    /// If a fixed address is set, it must be page aligned.
@@ -326,12 +326,12 @@ pub struct Mappings {
    pub ramdiskMemory: Mapping,
 }
 
-impl Mappings {
+impl BootMappings {
    /// Creates a new mapping configuration with dynamic mapping for kernel, boot info and
    /// frame buffer. Neither physical memory mapping nor recursive page table creation are
    /// enabled.
    pub const fn new() -> Self {
-      return Mappings{
+      return BootMappings {
          kernelStack: Mapping::new(),
          bootInfo: Mapping::new(),
          frameBuffer: Mapping::new(),

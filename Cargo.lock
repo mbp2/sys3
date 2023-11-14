@@ -302,25 +302,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "trident3-bootloader"
-version = "3.0.1"
-dependencies = [
- "base",
- "conquer-once",
- "log",
- "noto-sans-mono-bitmap",
- "rand",
- "rand_hc",
- "raw-cpuid",
- "serde",
- "spinning_top",
- "uart_16550",
- "usize_conversions",
- "x86_64",
- "xmas-elf",
-]
-
-[[package]]
 name = "trident3-bootloader-efi"
 version = "3.0.1"
 dependencies = [
@@ -344,6 +325,25 @@ dependencies = [
 [[package]]
 name = "trident3-main"
 version = "3.0.1"
+
+[[package]]
+name = "trident3-springboard"
+version = "3.0.1"
+dependencies = [
+ "base",
+ "conquer-once",
+ "log",
+ "noto-sans-mono-bitmap",
+ "rand",
+ "rand_hc",
+ "raw-cpuid",
+ "serde",
+ "spinning_top",
+ "uart_16550",
+ "usize_conversions",
+ "x86_64",
+ "xmas-elf",
+]
 
 [[package]]
 name = "uart_16550"
