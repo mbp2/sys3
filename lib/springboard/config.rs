@@ -1,6 +1,6 @@
 /// Taken from https://github.com/rust-lang/rust/blob/e100ec5bc7cd768ec17d75448b29c9ab4a39272b/library/core/src/slice/mod.rs#L1673-L1677
 ///
-/// TODO replace with `split_array` feature in stdlib as soon as it's stabilized,
+/// TODO: replace with `split_array` feature in stdlib as soon as it's stabilized,
 /// see https://github.com/rust-lang/rust/issues/90091
 fn splitArrayRef<const N: usize, T>(slice: &[T]) -> (&[T; N], &[T]) {
    let (a, b) = slice.split_at(N);
@@ -20,7 +20,7 @@ pub struct LoaderConfig {
    /// Automatically generated from the crate version. Checked on deserialization to
    /// ensure that the kernel and bootloader use the same API version, i.e. the same config
    /// and boot info format.
-   pub(crate) version: ApiVersion,
+   pub version: ApiVersion,
 
    /// Configuration for (optional) page table mappings created by the bootloader.
    pub mappings: BootMappings,
@@ -40,12 +40,12 @@ impl LoaderConfig {
       0x74, 0x3C, 0xA9, 0x61, 0x09, 0x36, 0x46, 0xA0, 0xBB, 0x55, 0x5C, 0x15, 0x89, 0x15, 0x25,
       0x3D,
    ];
-   
+
    #[doc(hidden)]
    pub const SERIALIZED_LEN: usize = 124;
-   
+
    pub const fn new() -> Self {
-      return LoaderConfig{
+      return LoaderConfig {
          kernelStackSize: 80 * 1024,
          mappings: BootMappings::new(),
          version: ApiVersion::new_default(),
@@ -53,13 +53,13 @@ impl LoaderConfig {
    }
 
    pub const fn Serialise(&self) -> [u8; Self::SERIALIZED_LEN] {
-      let Self{
+      let Self {
          kernelStackSize,
          mappings,
          version,
       } = self;
 
-      let ApiVersion{
+      let ApiVersion {
          major,
          minor,
          patch,
@@ -69,7 +69,7 @@ impl LoaderConfig {
       let BootMappings {
          kernelStack,
          bootInfo,
-         frameBuffer,
+         framebuffer: frameBuffer,
          physicalMemory,
          pageRecursiveTable,
          aslr,
@@ -78,7 +78,7 @@ impl LoaderConfig {
          ramdiskMemory,
       } = mappings;
 
-      let FrameBuffer{
+      let FrameBuffer {
          minHeight,
          minWidth,
       } = frameBuffer;
@@ -99,45 +99,57 @@ impl LoaderConfig {
       let buf = concat_58_10(
          buf,
          match physicalMemory {
-            Option::None => [0; 10],
-            Option::Some(m) => concat_1_9([1], m.Serialise()),
+            None => [0; 10],
+            Some(m) => concat_1_9([1], m.Serialise()),
          },
       );
 
       let buf = concat_68_10(
          buf,
          match pageRecursiveTable {
-            Option::None => [0; 10],
-            Option::Some(m) => concat_1_9([1], m.Serialise()),
+            None => [0; 10],
+            Some(m) => concat_1_9([1], m.Serialise()),
          },
       );
 
       let buf = concat_78_1(buf, [(*aslr) as u8]);
 
-      let buf = concat_79_9(buf, match dynamicRangeStart {
-         Option::None => [0; 9],
-         Option::Some(address) => concat_1_8([1], address.to_le_bytes()),
-      });
+      let buf = concat_79_9(
+         buf,
+         match dynamicRangeStart {
+            None => [0; 9],
+            Some(address) => concat_1_8([1], address.to_le_bytes()),
+         },
+      );
 
-      let buf = concat_88_9(buf, match dynamicRangeEnd {
-         Option::None => [0; 9],
-         Option::Some(address) => concat_1_8([1], address.to_le_bytes()),
-      });
+      let buf = concat_88_9(
+         buf,
+         match dynamicRangeEnd {
+            None => [0; 9],
+            Some(address) => concat_1_8([1], address.to_le_bytes()),
+         },
+      );
 
       let buf = concat_97_9(buf, ramdiskMemory.Serialise());
 
-      let buf = concat_106_9(buf, match minHeight {
-         Option::None => [0; 9],
-         Option::Some(address) => concat_1_8([1], address.to_le_bytes()),
-      });
+      let buf = concat_106_9(
+         buf,
+         match minHeight {
+            None => [0; 9],
+            Some(address) => concat_1_8([1], address.to_le_bytes()),
+         },
+      );
 
-      concat_115_9(buf, match minWidth {
-         Option::None => [0; 9],
-         Option::Some(address) => concat_1_8([1], address.to_le_bytes()),
-      })
+      concat_115_9(
+         buf,
+         match minWidth {
+            None => [0; 9],
+            Some(address) => concat_1_8([1], address.to_le_bytes()),
+         },
+      )
    }
 
-   pub fn Deserialise(serialised: &[u8]) -> Result<Self, &'static str> {
+   pub fn deserialise(serialised: &[u8]) -> Result<Self, &'static str> {
       if serialised.len() != Self::SERIALIZED_LEN {
          return Err("invalid len");
       }
@@ -155,16 +167,15 @@ impl LoaderConfig {
             [1] => true,
          };
 
-         let version = ApiVersion{
+         let version = ApiVersion {
             major: u16::from_le_bytes(major),
             minor: u16::from_le_bytes(minor),
             patch: u16::from_le_bytes(patch),
             preRelease: pre,
          };
 
-         (&version, s)
+         (version, s)
       };
-
 
       let (&kernelStackSize, s) = splitArrayRef(s);
 
@@ -186,15 +197,15 @@ impl LoaderConfig {
          let mappings = BootMappings {
             kernelStack: Mapping::Deserialise(&kernelStack)?,
             bootInfo: Mapping::Deserialise(&bootInfo)?,
-            frameBuffer: Mapping::Deserialise(&frameBuffer)?,
+            framebuffer: Mapping::Deserialise(&frameBuffer)?,
             physicalMemory: match physicalMemorySome {
-               [0] if physicalMemory == [0; 9] => Option::None,
-               [1] => Option::Some(Mapping::Deserialise(&physicalMemory)?),
+               [0] if physicalMemory == [0; 9] => None,
+               [1] => Some(Mapping::Deserialise(&physicalMemory)?),
                _ => return Err("invalid physical memory value"),
             },
             pageRecursiveTable: match prtSome {
-               [0] if prt == [0; 9] => Option::None,
-               [1] => Option::Some(Mapping::Deserialise(&prt)?),
+               [0] if prt == [0; 9] => None,
+               [1] => Some(Mapping::Deserialise(&prt)?),
                _ => return Err("invalid prt value"),
             },
             aslr: match aslr {
@@ -203,13 +214,13 @@ impl LoaderConfig {
                _ => return Err("invalid aslr value"),
             },
             dynamicRangeStart: match drsSome {
-               [0] if drs == [0; 8] => Option::None,
-               [1] => Option::Some(u64::from_le_bytes(drs)),
+               [0] if drs == [0; 8] => None,
+               [1] => Some(u64::from_le_bytes(drs)),
                _ => return Err("invalid dynamic range start value"),
             },
             dynamicRangeEnd: match dreSome {
-               [0] if dre == [0; 8] => Option::None,
-               [1] => Option::Some(u64::from_le_bytes(dre)),
+               [0] if dre == [0; 8] => None,
+               [1] => Some(u64::from_le_bytes(dre)),
                _ => return Err("invalid dynamic range end value"),
             },
             ramdiskMemory: Mapping::Deserialise(&rdm)?,
@@ -223,9 +234,9 @@ impl LoaderConfig {
       }
 
       return Ok(LoaderConfig{
-         version,
+         kernelStackSize: u64::from_le_bytes(kernelStackSize),
          mappings,
-         kernelStackSize
+         version,
       });
    }
 }
@@ -260,7 +271,7 @@ impl ApiVersion {
       };
    }
 
-   pub fn IsPreRelease(&self) -> bool {
+   pub fn PreRelease(&self) -> bool {
       return self.preRelease;
    }
 }
@@ -283,12 +294,12 @@ pub struct BootMappings {
    /// `FixedAddress(0xf_0000_0000)` will result in a guard page at address
    /// `0xf_0000_0000` and the kernel stack starting at address `0xf_0000_1000`.
    pub kernelStack: Mapping,
-   
+
    /// Specifies where the [`crate::BootInfo`] struct should be placed in virtual memory.
    pub bootInfo: Mapping,
-   
+
    /// Specifies the mapping of the frame buffer memory region.
-   pub frameBuffer: Mapping,
+   pub framebuffer: Mapping,
 
    /// The bootloader supports to map the whole physical memory into the virtual address
    /// space at some offset. This is useful for accessing and modifying the page tables set
@@ -296,7 +307,7 @@ pub struct BootMappings {
    ///
    /// Defaults to `None`, i.e. no mapping of the physical memory.
    pub physicalMemory: Option<Mapping>,
-   
+
    /// As an alternative to mapping the whole physical memory (see [`Self::physical_memory`]),
    /// the bootloader also has support for setting up a
    /// [recursive level 4 page table](https://os.phil-opp.com/paging-implementation/#recursive-page-tables).
@@ -310,12 +321,12 @@ pub struct BootMappings {
    ///
    /// Defaults to `false`.
    pub aslr: bool,
-   
+
    /// The lowest virtual address for dynamic addresses.
    ///
    /// Defaults to `0`.
    pub dynamicRangeStart: Option<u64>,
-   
+
    /// The highest virtual address for dynamic addresses.
    ///
    /// Defaults to `0xffff_ffff_ffff_f000`.
@@ -334,12 +345,12 @@ impl BootMappings {
       return BootMappings {
          kernelStack: Mapping::new(),
          bootInfo: Mapping::new(),
-         frameBuffer: Mapping::new(),
-         physicalMemory: Option::None,
-         pageRecursiveTable: Option::None,
+         framebuffer: Mapping::new(),
+         physicalMemory: None,
+         pageRecursiveTable: None,
          aslr: false,
-         dynamicRangeStart: Option::None,
-         dynamicRangeEnd: Option::None,
+         dynamicRangeStart: None,
+         dynamicRangeEnd: None,
          ramdiskMemory: Mapping::new(),
       };
    }
@@ -361,7 +372,7 @@ pub enum Mapping {
 
 impl Mapping {
    /// Creates a new [`Mapping::Dynamic`].
-   /// 
+   ///
    /// This function is basically identical to [`Default::default`], with the only difference
    /// being that this is a `const fn`.
    pub const fn new() -> Self {
@@ -386,7 +397,7 @@ impl Mapping {
       match variant {
          [0] if address == [0; 8] => Ok(Mapping::Dynamic),
          [1] => Ok(Mapping::Fixed(u64::from_le_bytes(address))),
-         _ => Err("invalid mapping value")
+         _ => Err("invalid mapping value"),
       }
    }
 }
@@ -417,7 +428,7 @@ pub struct BootConfig {
 
 impl Default for BootConfig {
    fn default() -> Self {
-      return Self{
+      return Self {
          frameBuffer: Default::default(),
          logLevel: Default::default(),
          frameBufferLogging: true,
@@ -438,9 +449,9 @@ pub struct FrameBuffer {
 impl FrameBuffer {
    /// Create a new framebuffer config with no requirements.
    pub const fn new() -> Self {
-      return FrameBuffer{
-         minHeight: Option::None,
-         minWidth: Option::None,
+      return FrameBuffer {
+         minHeight: None,
+         minWidth: None,
       };
    }
 }
@@ -473,5 +484,5 @@ impl Default for LevelFilter {
 
 use {
    crate::{concat::*, version_info},
-   serde::{Deserialize, Serialize}
+   serde::{Deserialize, Serialize},
 };

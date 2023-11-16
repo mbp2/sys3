@@ -4,9 +4,8 @@
 /// we will be working with raw memory. Rust cannot
 /// make any guarantees when we do this.
 pub unsafe fn Write<T>(addr: usize, offset: usize, val: T)
-   where
-      T: Copy,
-{
+where
+   T: Copy, {
    // Set the pointer based off of the address
    let reg = addr as *mut u8;
 
@@ -24,9 +23,8 @@ pub unsafe fn Write<T>(addr: usize, offset: usize, val: T)
 /// we will be working with raw memory. Rust cannot
 /// make any guarantees when we do this.
 pub unsafe fn Read<T>(addr: usize) -> Option<T>
-   where
-      T: Copy,
-{
+where
+   T: Copy, {
    // Set the pointer based off of the address
    let reg: *mut u8 = addr as *mut u8;
 

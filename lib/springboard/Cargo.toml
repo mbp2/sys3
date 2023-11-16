@@ -2,7 +2,7 @@
 build = "build.rs"
 description = "EFI- and BIOS-compatible bootloader for Trident 3"
 edition = "2021"
-name = "trident3-springboard"
+name = "springboard"
 version.workspace = true
 
 [lib]
@@ -10,6 +10,7 @@ name = "springboard"
 path = "index.rs"
 
 [dependencies]
+anyhow.workspace = true
 base.workspace = true
 conquer-once = { version = "0.3.2", default-features = false }
 log = "0.4.17"

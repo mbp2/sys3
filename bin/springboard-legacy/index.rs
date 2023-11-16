@@ -6,8 +6,6 @@
 #![no_main]
 #![no_std]
 
-
-
 // MODULES //
 
 extern crate base;

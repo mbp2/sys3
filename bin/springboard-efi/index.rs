@@ -2,10 +2,7 @@
 //! — An EFI-compatible bootloader for the Trident system.
 #![allow(non_snake_case)]
 #![warn(missing_docs)]
-#![deny(
-   missing_abi,
-   unsafe_op_in_unsafe_fn
-)]
+#![deny(missing_abi, unsafe_op_in_unsafe_fn)]
 #![no_main]
 #![no_std]
 
@@ -22,7 +19,7 @@ fn efi_main(image: Handle, table: SystemTable<Boot>) -> Status {
 fn loadConfigFile(
    image: Handle,
    table: &mut SystemTable<Boot>,
-   mode: BootMode
+   mode: BootMode,
 ) -> Option<&'static mut [u8]> {
 }
 
@@ -40,7 +37,7 @@ impl<T> Deref for RacyCell<T> {
    type Target = UnsafeCell<T>;
 
    fn deref(&self) -> &Self::Target {
-       &self.0
+      &self.0
    }
 }
 
@@ -70,7 +67,6 @@ use {
       ops::{Deref, DerefMut},
       ptr, slice,
    },
-
    uefi::{
       prelude::{entry, Boot, Handle, Status, SystemTable},
       proto::{
@@ -88,14 +84,12 @@ use {
          ProtocolPointer,
       },
       table::boot::{
-         AllocateType, MemoryType, OpenProtocolAttributes,
-         OpenProtocolParams, ScopedProtocol,
+         AllocateType, MemoryType, OpenProtocolAttributes, OpenProtocolParams, ScopedProtocol,
       },
       CStr16, CStr8,
    },
-
    x86_64::{
       structures::paging::{FrameAllocator, PageOffset, PageTable, PhysFrame, Size4KiB},
       PhysAddr, VirtAddr,
-   }
+   },
 };

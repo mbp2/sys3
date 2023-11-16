@@ -9,4 +9,4 @@ version.workspace = true
 [lib]
 crate-type = ["staticlib"]
 name = "t3_main"
-path = "main/index.rs"
+path = "index.rs"

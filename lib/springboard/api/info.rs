@@ -1,3 +1,6 @@
+/// Check BootInfo for FFI-safety.
+extern "C" fn _assert_ffi(_: BootInfo) {}
+
 /// This structure represents the information that the bootloader passes to the kernel.
 ///
 /// The information is passed as an argument to the entry point. The entry point function must
@@ -6,7 +9,7 @@
 /// ```
 /// # use springboard::api::BootInfo;
 /// # type _SIGNATURE =
-/// extern "C" fn(boot_info: &'static mut BootInfo) -> !;
+/// extern "C" fn(bootInfo: &'static mut BootInfo) -> !;
 /// ```
 ///
 /// Note that no type checking occurs for the entry point function, so be careful to
@@ -106,28 +109,28 @@ impl BootInfo {
 #[derive(Debug)]
 #[repr(C)]
 pub struct MemoryRegions {
-   pub(crate) ptr: *mut MemoryRegion,
-   pub(crate) length: usize,
+   pub pointer: *mut MemoryRegion,
+   pub length: usize,
 }
 
 impl ops::Deref for MemoryRegions {
    type Target = [MemoryRegion];
 
    fn deref(&self) -> &Self::Target {
-      unsafe { slice::from_raw_parts(self.ptr, self.length) }
+      unsafe { slice::from_raw_parts(self.pointer, self.length) }
    }
 }
 
 impl ops::DerefMut for MemoryRegions {
    fn deref_mut(&mut self) -> &mut Self::Target {
-      unsafe { slice::from_raw_parts_mut(self.ptr, self.length) }
+      unsafe { slice::from_raw_parts_mut(self.pointer, self.length) }
    }
 }
 
 impl From<&'static mut [MemoryRegion]> for MemoryRegions {
    fn from(regions: &'static mut [MemoryRegion]) -> Self {
       return MemoryRegions {
-         ptr: regions.as_mut_ptr(),
+         pointer: regions.as_mut_ptr(),
          length: regions.len(),
       };
    }
@@ -135,7 +138,7 @@ impl From<&'static mut [MemoryRegion]> for MemoryRegions {
 
 impl From<MemoryRegions> for &'static mut [MemoryRegion] {
    fn from(regions: MemoryRegions) -> &'static mut [MemoryRegion] {
-      unsafe { slice::from_raw_parts_mut(regions.ptr, regions.length) }
+      unsafe { slice::from_raw_parts_mut(regions.pointer, regions.length) }
    }
 }
 
@@ -180,7 +183,7 @@ impl PixelBuffer {
    /// The given start address and info must describe a valid, accessible, and unaliased
    /// framebuffer.
    pub unsafe fn new(start: u64, info: PixelBufferInfo) -> Self {
-      return PixelBuffer{ start, info };
+      return PixelBuffer { start, info };
    }
 
    pub fn Buffer(&self) -> &[u8] {
@@ -291,9 +294,6 @@ pub struct TlsTemplate {
 }
 
 // IMPORTS //
-
-/// Check bootinfo for FFI-safety.
-extern "C" fn _assert_ffi(_bootinfo: BootInfo) {}
 
 use {
    crate::config::ApiVersion,

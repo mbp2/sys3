@@ -11,6 +11,7 @@ members = [
    "bin/springboard-legacy",
    "lib/base",
    "lib/springboard",
+   "lib/springboard/builder"
 ]
 
 [workspace.package]
@@ -22,6 +23,7 @@ repository = "https://github.com/azyklus/sys3"
 version = "3.0.1"
 
 [workspace.dependencies]
+anyhow = "1.0.75"
 base = { path = "./lib/base", version = "3.0.1" }
 spin = { version = "0.9.8", features=["spin_mutex"] }
 

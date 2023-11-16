@@ -3,10 +3,7 @@
 #![allow(non_snake_case)]
 #![warn(missing_docs)]
 #![deny(missing_abi)]
-#![feature(
-decl_macro,
-step_trait
-)]
+#![feature(decl_macro, step_trait)]
 #![no_std]
 
 /// Defines the entry point function.
@@ -14,15 +11,15 @@ step_trait
 /// The function must have the signature `fn(&'static mut BootInfo) -> !`.
 ///
 /// This macro just creates a function named `_start`, which the linker will use as the entry
-/// point. The advantage of using this macro instead of providing an own `_start` function is
+/// point. The advantage of using this macro instead of providing your own `_start` function is
 /// that the macro ensures that the function and argument types are correct.
 ///
 /// ## Configuration
 ///
 /// This macro supports an optional second parameter to configure how the bootloader should
 /// boot the kernel. The second parameter needs to be given as `config = ...` and be of type
-/// [`&BootloaderConfig`](crate::BootloaderConfig). If not given, the configuration defaults to
-/// [`BootloaderConfig::new`](crate::BootloaderConfig::new).
+/// [`&BootloaderConfig`](BootloaderConfig). If not given, the configuration defaults to
+/// [`BootloaderConfig::new`](BootloaderConfig::new).
 ///
 /// ## Examples
 ///
@@ -92,7 +89,7 @@ step_trait
 /// - **Configuration:** Behind the scenes, the configuration struct is serialized using
 ///   [`BootloaderConfig::serialize`](crate::BootloaderConfig::serialize). The resulting byte
 ///   array is then stored as a static variable annotated with
-///   `#[link_section = ".bootloader-config"]`, which instructs the Rust compiler to store it
+///   `#[link_section = ".loader-config"]`, which instructs the Rust compiler to store it
 ///   in a special section of the resulting ELF executable. From there, the bootloader will
 ///   automatically read it when loading the kernel.
 pub macro start {
@@ -134,9 +131,9 @@ pub fn LoadAndSwitchToKernel<I, D>(
    mut pageTables: PageTables,
    systemInfo: SystemInfo,
 ) -> !
-   where
-      I: ExactSizeIterator<Item=D> + Clone,
-      D: LegacyMemoryRegion, {
+where
+   I: ExactSizeIterator<Item = D> + Clone,
+   D: LegacyMemoryRegion, {
    let config = &kernel.config;
    let mut mappings = SetUpMappings(
       kernel,
@@ -167,14 +164,14 @@ pub fn SetUpMappings<I, D>(
    config: &LoaderConfig,
    systemInfo: &SystemInfo,
 ) -> KernelMappings
-   where
-      I: ExactSizeIterator<Item=D> + Clone,
-      D: LegacyMemoryRegion {
+where
+   I: ExactSizeIterator<Item = D> + Clone,
+   D: LegacyMemoryRegion, {
    let kernelPageTable = &mut pageTables.kernel;
 
    let mut usedEntries = UsedLevel4Entries::new(
-      frameAllocator.maxPhysAddress(),
-      frameAllocator.length(),
+      frameAllocator.MaxPhysAddress(),
+      frameAllocator.Length(),
       framebuffer,
       config,
    );
@@ -188,12 +185,9 @@ pub fn SetUpMappings<I, D>(
    let kernelSliceStart = PhysAddr::new(kernel.startAddress as _);
    let kernelSliceLength = u64::try_from(kernel.length).unwrap();
 
-   let (kernelImageOffset, entryPoint, tlsTemplate) = loader::LoadKernel(
-      kernel,
-      kernelPageTable,
-      frameAllocator,
-      &mut usedEntries,
-   ).expect("no entry point");
+   let (kernelImageOffset, entryPoint, tlsTemplate) =
+      loader::LoadKernel(kernel, kernelPageTable, frameAllocator, &mut usedEntries)
+         .expect("no entry point");
 
    log::info!("Entry point at {:#x}", entryPoint.as_u64());
 
@@ -221,24 +215,16 @@ pub fn SetUpMappings<I, D>(
 
       match unsafe { kernelPageTable.map_to(page, frame, flags, frameAllocator) } {
          Ok(tlb) => tlb.flush(),
-         Err(err) => panic!("failed to map page {:?}: {:?}", page, err)
+         Err(err) => panic!("failed to map page {:?}: {:?}", page, err),
       }
    }
 
    let ctxSwitchFn = PhysAddr::new(contextSwitch as *const () as u64);
    let ctxSwitchFnStartFrame = PhysFrame::containing_address(ctxSwitchFn);
 
-   for frame in PhysFrame::range_inclusive(
-      ctxSwitchFnStartFrame,
-      ctxSwitchFnStartFrame + 1,
-   ) {
-      match unsafe {
-         kernelPageTable.identity_map(
-            frame,
-            PageTableFlags::PRESENT,
-            frameAllocator,
-         )
-      } {
+   for frame in PhysFrame::range_inclusive(ctxSwitchFnStartFrame, ctxSwitchFnStartFrame + 1) {
+      match unsafe { kernelPageTable.identity_map(frame, PageTableFlags::PRESENT, frameAllocator) }
+      {
          Ok(tlb) => tlb.flush(),
          Err(err) => panic!("failed to identity map frame {:?}: {:?}", frame, err),
       }
@@ -247,17 +233,13 @@ pub fn SetUpMappings<I, D>(
    // Create, load, and identity-map GDT frame.
    // This is required for working `iretq`
    let gdtFrame = frameAllocator
-      .allocate_frame().expect("failed to allocate GDT frame");
+      .allocate_frame()
+      .expect("failed to allocate GDT frame");
 
    gdt::CreateAndLoadGdt(gdtFrame);
 
-   match unsafe {
-      kernelPageTable.identity_map(
-         gdtFrame,
-         PageTableFlags::PRESENT,
-         frameAllocator,
-      )
-   } {
+   match unsafe { kernelPageTable.identity_map(gdtFrame, PageTableFlags::PRESENT, frameAllocator) }
+   {
       Ok(tlb) => tlb.flush(),
       Err(err) => panic!("failed to identity map frame {:?}: {:?}", gdtFrame, err),
    }
@@ -267,27 +249,26 @@ pub fn SetUpMappings<I, D>(
       log::info!("Mapping framebuffer");
 
       let fbStartFrame = PhysFrame::containing_address(framebuffer.address);
-      let fbEndFrame = PhysFrame::containing_address(
-         framebuffer.address + framebuffer.info.byteLength - 1u64
-      );
+      let fbEndFrame =
+         PhysFrame::containing_address(framebuffer.address + framebuffer.info.byteLength - 1u64);
 
       let startPage = mappingAddressPageAligned(
-         config.mappings.frameBuffer,
+         config.mappings.framebuffer,
          u64::from_usize(framebuffer.info.byteLength),
          &mut usedEntries,
          "framebuffer",
       );
 
-      for (i, frame) in PhysFrame::range_inclusive(
-         fbStartFrame,
-         fbEndFrame,
-      ).enumerate() {
+      for (i, frame) in PhysFrame::range_inclusive(fbStartFrame, fbEndFrame).enumerate() {
          let page = startPage + u64::from_usize(i);
          let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
 
          match unsafe { kernelPageTable.map_to(page, frame, flags, frameAllocator) } {
             Ok(tlb) => tlb.flush(),
-            Err(err) => panic!("failed to map page {:?} to frame {:?}: {:?}", page, frame, err)
+            Err(err) => panic!(
+               "failed to map page {:?} to frame {:?}: {:?}",
+               page, frame, err
+            ),
          }
       }
 
@@ -307,15 +288,15 @@ pub fn SetUpMappings<I, D>(
       );
 
       let physicalAddress = PhysAddr::new(address);
-      let ramdiskPhysicalStartPage: PhysFrame<Size4KiB> = PhysFrame::containing_address(physicalAddress);
+      let ramdiskPhysicalStartPage: PhysFrame<Size4KiB> =
+         PhysFrame::containing_address(physicalAddress);
       let ramdiskPageCount = (systemInfo.ramdiskLength - 1) / Size4KiB::SIZE;
       let ramdiskPhysicalEndPage = ramdiskPhysicalStartPage + ramdiskPageCount;
 
       let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
-      for (i, frame) in PhysFrame::range_inclusive(
-         ramdiskPhysicalStartPage,
-         ramdiskPhysicalEndPage,
-      ).enumerate() {
+      for (i, frame) in
+         PhysFrame::range_inclusive(ramdiskPhysicalStartPage, ramdiskPhysicalEndPage).enumerate()
+      {
          let page = startPage + i as u64;
          match unsafe { kernelPageTable.map_to(page, frame, flags, frameAllocator) } {
             Ok(tlb) => tlb.ignore(),
@@ -335,7 +316,7 @@ pub fn SetUpMappings<I, D>(
       log::info!("Map physical memory");
 
       let startFrame = PhysFrame::containing_address(PhysAddr::zero());
-      let maxPhysicalAddress = frameAllocator.maxPhysAddress();
+      let maxPhysicalAddress = frameAllocator.MaxPhysAddress();
       let endFrame: PhysFrame<Size2MiB> = PhysFrame::containing_address(maxPhysicalAddress - 1u64);
 
       let size = maxPhysicalAddress.as_u64();
@@ -422,12 +403,106 @@ pub fn CreateBootInfo<I, D>(
    mappings: &mut KernelMappings,
    systemInfo: SystemInfo,
 ) -> &'static mut BootInfo
-   where
-      I: ExactSizeIterator<Item=D> + Clone,
-      D: LegacyMemoryRegion,
-{
+where
+   I: ExactSizeIterator<Item = D> + Clone,
+   D: LegacyMemoryRegion, {
    log::info!("Allocate boot info!");
-   //TODO: Finish the CreateBootInfo function
+
+   let config = config.clone();
+   let (bootInfo, memoryRegions) = {
+      let bootInfoLayout = Layout::new::<BootInfo>();
+      let regions = frameAllocator.Length();
+      let memoryRegionsLayout = Layout::array::<MemoryRegion>(regions).unwrap();
+      let (combined, memoryRegionsOffset) = bootInfoLayout.extend(memoryRegionsLayout).unwrap();
+
+      let bootInfoAddress = mappingAddress(
+         config.mappings.bootInfo,
+         u64::from_usize(combined.size()),
+         u64::from_usize(combined.align()),
+         &mut mappings.usedEntries,
+      )
+      .expect("boot info address is not properly aligned");
+
+      let memoryMapRegionsAddress = bootInfoAddress + memoryRegionsOffset;
+      let memoryMapRegionsEnd = bootInfoAddress + combined.size();
+
+      let startPage = Page::containing_address(bootInfoAddress);
+      let endPage = Page::containing_address(memoryMapRegionsEnd - 1u64);
+      for page in Page::range_inclusive(startPage, endPage) {
+         let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
+         let frame = frameAllocator
+            .allocate_frame()
+            .expect("frame allocation for boot info failed");
+
+         match unsafe {
+            pageTables
+               .kernel
+               .map_to(page, frame, flags, &mut frameAllocator)
+         } {
+            Ok(tlb) => tlb.flush(),
+            Err(err) => panic!("failed to map page {:?}: {:?}", page, err),
+         }
+
+         // We also need access to the bootloader
+         match unsafe {
+            pageTables
+               .bootloader
+               .map_to(page, frame, flags, &mut frameAllocator)
+         } {
+            Ok(tlb) => tlb.flush(),
+            Err(err) => panic!("failed to map page {:?}: {:?}", page, err),
+         }
+      }
+
+      let bootInfo: &'static mut MaybeUninit<BootInfo> =
+         unsafe { &mut *bootInfoAddress.as_mut_ptr() };
+
+      let memoryRegions: &'static mut [MaybeUninit<MemoryRegion>] =
+         unsafe { slice::from_raw_parts_mut(memoryMapRegionsAddress.as_mut_ptr(), regions) };
+
+      (bootInfo, memoryRegions)
+   };
+
+   log::info!("Create Memory Map");
+
+   let mut bootInfo = bootInfo.write({
+      let mut info = BootInfo::new(memoryRegions.into());
+      info.frameBuffer = mappings
+         .framebuffer
+         .map(|address| unsafe {
+            PixelBuffer::new(
+               address.as_u64(),
+               systemInfo
+                  .framebuffer
+                  .expect(
+                     "there should not be a mapping for the framebuffer if there is no framebuffer",
+                  )
+                  .info,
+            )
+         })
+         .into();
+
+      info.physMemoryOffset = mappings.physicalMemoryOffset.map(VirtAddr::as_u64).into();
+      info.recursiveIndex = mappings.recursiveIndex.map(Into::into).into();
+      info.rsdpAddress = systemInfo
+         .rsdpAddress
+         .map(|address| address.as_u64())
+         .into();
+      info.tlsTemplate = mappings.tlsTemplate.into();
+      info.ramdiskAddress = mappings
+         .ramdiskSliceStart
+         .map(|address| address.as_u64())
+         .into();
+      info.ramdiskLength = mappings.ramdiskSliceLength;
+      info.kernelAddress = mappings.kernelSliceStart.as_u64();
+      info.kernelLength = mappings.kernelSliceLength as _;
+      info.kernelImageOffset = mappings.kernelImageOffset.as_u64();
+      info.testSentinel = bootConfig.testSentinel;
+
+      info
+   });
+
+   return bootInfo;
 }
 
 pub fn SwitchToKernel(
@@ -436,8 +511,7 @@ pub fn SwitchToKernel(
    bootInfo: &'static mut BootInfo,
 ) -> ! {
    let PageTables {
-      kernelLevel4Frame,
-      ..
+      kernelLevel4Frame, ..
    } = pageTables;
 
    let addresses = Addresses {
@@ -447,7 +521,10 @@ pub fn SwitchToKernel(
       bootInfo,
    };
 
-   log::info!("Jumping to kernel entry point at {:?}", addresses.entryPoint);
+   log::info!(
+      "Jumping to kernel entry point at {:?}",
+      addresses.entryPoint
+   );
 
    unsafe { contextSwitch(addresses) }
 }
@@ -460,7 +537,7 @@ fn mappingAddressPageAligned(
 ) -> Page {
    match mappingAddress(mapping, size, Size4KiB::SIZE, usedEntries) {
       Ok(address) => Page::from_start_address(address).unwrap(),
-      Err(address) => panic!("{kind} address must be page-aligned (is `{address:?}`)"),
+      Err(address) => panic!("{} address must be page-aligned (is `{:?}`)", kind, address),
    }
 }
 
@@ -472,7 +549,7 @@ fn mappingAddress(
 ) -> Result<VirtAddr, VirtAddr> {
    let address = match mapping {
       Mapping::Fixed(address) => VirtAddr::new(address),
-      Mapping::Dynamic => usedEntries.getFreeAddress(size, alignment),
+      Mapping::Dynamic => usedEntries.GetFreeAddress(size, alignment),
    };
 
    return if address.is_aligned(alignment) {
@@ -559,7 +636,7 @@ impl<'a> Kernel<'a> {
 
          let raw = section.raw_data(&kernelElf);
 
-         LoaderConfig::Deserialise(raw)
+         LoaderConfig::deserialise(raw)
             .expect("kernel was compiled with incompatible springboard version")
       };
 
@@ -620,11 +697,10 @@ pub struct PageTables {
 
 // IMPORTS //
 
-use x86_64::structures::paging::mapper::MappedFrame::Size4KiB;
 use {
    crate::{
-      api::info::{PixelBuffer, PixelBufferInfo},
-      config::{BootConfig, LoaderConfig, BootMappings, Mapping},
+      api::info::{MemoryRegion, PixelBuffer, PixelBufferInfo, TlsTemplate},
+      config::{BootConfig, LoaderConfig, Mapping},
       legacy::{LegacyFrameAllocator, LegacyMemoryRegion},
       level4::UsedLevel4Entries,
    },
@@ -644,13 +720,23 @@ use {
 // MODULES //
 
 pub mod api;
+#[cfg(feature = "bios")]
+pub mod bios;
 pub mod config;
 pub mod entropy;
 pub mod framebuffer;
 pub mod gdt;
+#[cfg(feature = "uefi")]
+pub mod gpt;
 pub mod legacy;
 pub mod level4;
 pub mod loader;
+pub mod logger;
+#[cfg(feature = "bios")]
+pub mod mbr;
+pub mod serial;
+#[cfg(feature = "uefi")]
+pub mod uefi;
 
 pub(crate) mod concat {
    include!(concat!(env!("OUT_DIR"), "/concat.rs"));
@@ -660,10 +746,11 @@ pub(crate) mod version_info {
    include!(concat!(env!("OUT_DIR"), "/version_info.rs"));
 }
 
-pub use self::{
-   config::LoaderConfig as BootloaderConfig,
-   api::info::BootInfo,
-};
+// EXPORTS //
+
+pub use self::{api::info::BootInfo, config::LoaderConfig as BootloaderConfig};
+
+// EXTERNS //
 
 extern crate base;
 extern crate conquer_once;

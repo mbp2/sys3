@@ -9,9 +9,10 @@ const BORDER_PADDING: usize = 1;
 /// Returns the raster of the given char or the raster of [`font_constants::BACKUP_CHAR`].
 fn getCharRaster(c: char) -> RasterizedChar {
    fn get(c: char) -> Option<RasterizedChar> {
-      get_raster(c,
+      get_raster(
+         c,
          font_constants::FONT_WEIGHT,
-         font_constants::CHAR_RASTER_HEIGHT
+         font_constants::CHAR_RASTER_HEIGHT,
       )
    }
 
@@ -28,7 +29,7 @@ pub struct FrameBufferWriter {
 
 impl FrameBufferWriter {
    pub fn new(buffer: &'static mut [u8], info: PixelBufferInfo) -> Self {
-      let mut logger = FrameBufferWriter{
+      let mut logger = FrameBufferWriter {
          buffer,
          info,
          xPos: 0,
@@ -109,15 +110,14 @@ impl FrameBufferWriter {
 
       let bbp = self.info.bbp;
       let byteOffset = pixelOffset * bbp;
-      self.buffer[byteOffset..(byteOffset + bbp)]
-         .copy_from_slice(&colour[..bbp]);
+      self.buffer[byteOffset..(byteOffset + bbp)].copy_from_slice(&colour[..bbp]);
 
       let _ = unsafe { ptr::read_volatile(&self.buffer[byteOffset]) };
    }
 }
 
-unsafe impl Send for FrameBufferWriter{}
-unsafe impl Sync for FrameBufferWriter{}
+unsafe impl Send for FrameBufferWriter {}
+unsafe impl Sync for FrameBufferWriter {}
 
 impl fmt::Write for FrameBufferWriter {
    fn write_str(&mut self, s: &str) -> fmt::Result {
@@ -136,8 +136,7 @@ use {
    core::{fmt, ptr},
    font_constants::BACKUP_CHAR,
    noto_sans_mono_bitmap::{
-      get_raster, get_raster_width,
-      FontWeight, RasterHeight, RasterizedChar,
+      get_raster, get_raster_width, FontWeight, RasterHeight, RasterizedChar,
    },
 };
 

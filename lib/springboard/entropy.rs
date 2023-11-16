@@ -1,10 +1,6 @@
 /// Gather entropy from various sources to seed a RNG.
 pub fn BuildRng() -> Hc128Rng {
-   const ENTROPY_SOURCES: [fn() -> [u8; 32]; 3] = [
-      rdRandEntropy,
-      tscEntropy,
-      pitEntropy,
-   ];
+   const ENTROPY_SOURCES: [fn() -> [u8; 32]; 3] = [rdRandEntropy, tscEntropy, pitEntropy];
 
    let mut seed = [0; 32];
    for src in ENTROPY_SOURCES {
@@ -31,7 +27,7 @@ pub fn GetRandom64(rd: RdRand) -> Option<u64> {
    }
 
    return None;
-} 
+}
 
 /// Gather entropy by requesting random numbers with `RDRAND` instruction if it's available.
 ///
@@ -82,16 +78,16 @@ fn pitEntropy() -> [u8; 32] {
    let mut entropy = [0; 32];
 
    for (i, entropy_byte) in entropy.iter_mut().enumerate() {
-       // Cycle through channels 1-3.
-       let channel = i % 3;
+      // Cycle through channels 1-3.
+      let channel = i % 3;
 
-       let mut port = Port::<u8>::new(0x40 + channel as u16);
-       let value = unsafe {
-           // SAFETY: It's safe to read from ports 0x40-0x42.
-           port.read()
-       };
+      let mut port = Port::<u8>::new(0x40 + channel as u16);
+      let value = unsafe {
+         // SAFETY: It's safe to read from ports 0x40-0x42.
+         port.read()
+      };
 
-       *entropy_byte = value;
+      *entropy_byte = value;
    }
 
    entropy

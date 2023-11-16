@@ -5,7 +5,7 @@ pub fn CreateAndLoadGdt(frame: PhysFrame) {
    let virtAddress = VirtAddr::new(physAddress.as_u64());
 
    let ptr: *mut GlobalDescriptorTable = virtAddress.as_mut_ptr();
-   
+
    let mut gdt = GlobalDescriptorTable::new();
    let codeSelector = gdt.add_entry(Descriptor::kernel_code_segment());
    let dataSelector = gdt.add_entry(Descriptor::kernel_data_segment());

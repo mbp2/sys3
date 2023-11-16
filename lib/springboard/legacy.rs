@@ -1,21 +1,21 @@
 /// Abstraction trait for a memory region returned by the UEFI or BIOS firmware.
 pub trait LegacyMemoryRegion: Copy + core::fmt::Debug {
    /// Return the physical start address of this region.
-   fn start(&self) -> PhysAddr;
+   fn Start(&self) -> PhysAddr;
 
    /// Return the size of the region in bytes.
-   fn length(&self) -> u64;
+   fn Length(&self) -> u64;
 
    /// Check whether this region is empty.
-   fn isEmpty(&self) -> bool {
-      self.length() == 0
+   fn Empty(&self) -> bool {
+      self.Length() == 0
    }
 
    /// The type of the region, e.g. whether or not it is usable or reserved elsewhere.
-   fn kind(&self) -> MemoryRegionKind;
+   fn Kind(&self) -> MemoryRegionKind;
 
    /// Some regions become usable when the bootloader jumps to the kernel.
-   fn usableAfterLoaderExit(&self) -> bool;
+   fn UsableAfterLoaderExit(&self) -> bool;
 }
 
 /// A physical frame allocator based on a BIOS or UEFI provided memory map.
@@ -38,12 +38,12 @@ where
    /// library assumes that references can never point to virtual address `0`.  
    pub fn new(map: I) -> Self {
       let startFrame = PhysFrame::containing_address(PhysAddr::new(0x1000));
-      return Self::newStartingAt(startFrame, map);
+      return Self::startingAt(startFrame, map);
    }
 
    /// Creates a new frame allocator based on the given legacy memory regions. Skips any frames
    /// before the given `frame`.
-   pub fn newStartingAt(frame: PhysFrame, map: I) -> Self {
+   pub fn startingAt(frame: PhysFrame, map: I) -> Self {
       return Self {
          original: map.clone(),
          memoryMap: map,
@@ -53,9 +53,9 @@ where
    }
 
    fn allocateFrameFromDescriptor(&mut self, descriptor: D) -> Option<PhysFrame> {
-      let startAddress = descriptor.start();
+      let startAddress = descriptor.Start();
       let startFrame = PhysFrame::containing_address(startAddress);
-      let endAddress = startAddress + descriptor.length();
+      let endAddress = startAddress + descriptor.Length();
       let endFrame = PhysFrame::containing_address(endAddress - 1u64);
 
       if self.nextFrame < startFrame {
@@ -75,23 +75,23 @@ where
    ///
    /// The function always returns the same value, i.e. the length doesn't
    /// change after calls to `allocate_frame`.
-   pub fn length(&self) -> usize {
+   pub fn Length(&self) -> usize {
       self.original.len()
    }
 
    /// Returns whether this memory map is empty.
-   pub fn isEmpty(&self) -> bool {
-      self.length() == 0
+   pub fn Empty(&self) -> bool {
+      self.Length() == 0
    }
 
    /// Returns the largest detected physical memory address.
    ///
    /// Useful for creating a mapping for all physical memory.
-   pub fn maxPhysAddress(&self) -> PhysAddr {
+   pub fn MaxPhysAddress(&self) -> PhysAddr {
       self
          .original
          .clone()
-         .map(|r| r.start() + r.length())
+         .map(|r| r.Start() + r.Length())
          .max()
          .unwrap()
    }
@@ -112,18 +112,18 @@ where
       let kernelSliceStart = kernelSliceStart.as_u64();
 
       for descriptor in self.original {
-         let mut start = descriptor.start();
-         let end = start + descriptor.length();
+         let mut start = descriptor.Start();
+         let end = start + descriptor.Length();
          let nextFree = self.nextFrame.start_address();
-         let kind = match descriptor.kind() {
+         let kind = match descriptor.Kind() {
             MemoryRegionKind::Usable => {
                if end <= nextFree {
                   MemoryRegionKind::Bootloader
-               } else if descriptor.start() >= nextFree {
+               } else if descriptor.Start() >= nextFree {
                   MemoryRegionKind::Usable
                } else {
                   let usedRegion = MemoryRegion {
-                     start: descriptor.start().as_u64(),
+                     start: descriptor.Start().as_u64(),
                      end: nextFree.as_u64(),
                      kind: MemoryRegionKind::Bootloader,
                   };
@@ -135,7 +135,7 @@ where
                }
             }
 
-            _ if descriptor.usableAfterLoaderExit() => {
+            _ if descriptor.UsableAfterLoaderExit() => {
                // Region was not usable before, but it will be as soon as
                // the bootloader passes control to the kernel. We don't
                // need to check against `next_free` because the
@@ -233,9 +233,9 @@ where
 }
 
 unsafe impl<I, D> FrameAllocator<Size4KiB> for LegacyFrameAllocator<I, D>
-   where
-      I: ExactSizeIterator<Item = D> + Clone,
-      I::Item: LegacyMemoryRegion,
+where
+   I: ExactSizeIterator<Item = D> + Clone,
+   I::Item: LegacyMemoryRegion,
 {
    fn allocate_frame(&mut self) -> Option<PhysFrame<Size4KiB>> {
       if let Some(current) = self.currentDescriptor {
@@ -248,7 +248,7 @@ unsafe impl<I, D> FrameAllocator<Size4KiB> for LegacyFrameAllocator<I, D>
       }
 
       while let Some(descriptor) = self.memoryMap.next() {
-         if descriptor.kind() != MemoryRegionKind::Usable {
+         if descriptor.Kind() != MemoryRegionKind::Usable {
             continue;
          }
 
