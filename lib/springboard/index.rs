@@ -93,11 +93,11 @@
 ///   in a special section of the resulting ELF executable. From there, the bootloader will
 ///   automatically read it when loading the kernel.
 pub macro start {
-($path:path) => {
+   ($path:path) => {
       $crate::start!($path, config = &$crate:config::LoaderConfig::new());
    }
 
-($path:path, config = $config:expr) => {
+   ($path:path, config = $config:expr) => {
       const _: () = {
          #[link_section=".loader-config"]
          pub static __BOOTLOADER_CONFIG: [u8; $crate::BootloaderConfig::SERIALIZED_LEN] = {
