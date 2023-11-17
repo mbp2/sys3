@@ -2,16 +2,11 @@
 resolver = "2"
 default-members = [
    "main",
-   "lib/springboard"
 ]
 members = [
    "main",
    "bin/ffsh",
-   "bin/springboard-efi",
-   "bin/springboard-legacy",
    "lib/base",
-   "lib/springboard",
-   "lib/springboard/builder"
 ]
 
 [workspace.package]
