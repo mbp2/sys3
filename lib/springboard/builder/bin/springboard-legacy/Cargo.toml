@@ -1,0 +1,15 @@
+[package]
+description = "Legacy-compatible bootloader program"
+edition.workspace = true
+name = "springboard-legacy"
+version.workspace = true
+
+[[bin]]
+name = "t3_boot_legacy"
+path = "index.rs"
+
+[dependencies]
+base.workspace = true
+log = "0.4.14"
+serde-json-core = "0.5.0"
+x86_64 = "0.14.8"

@@ -7,6 +7,11 @@ members = [
    "main",
    "bin/ffsh",
    "lib/base",
+   "lib/springboard",
+   "lib/springboard/base",
+   "lib/springboard/builder",
+   "lib/springboard/builder/bin/springboard-efi",
+   "lib/springboard/builder/bin/springboard-legacy"
 ]
 
 [workspace.package]

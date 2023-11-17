@@ -1,0 +1,36 @@
+[package]
+build = "build.rs"
+description = "EFI- and BIOS-compatible bootloader for Trident 3"
+edition.workspace = true
+name = "springboard"
+version.workspace = true
+
+[lib]
+name = "springboard"
+path = "index.rs"
+
+[dependencies]
+anyhow.workspace = true
+base.workspace = true
+conquer-once = { version = "0.3.2", default-features = false }
+log = "0.4.17"
+raw-cpuid = "10.2.0"
+rand = { version = "0.8.4", default-features = false }
+rand_hc = "0.3.1"
+serde = { version = "1", default-features = false, features=["derive"] }
+spinning_top = "0.2.4"
+uart_16550 = "0.2.18"
+usize_conversions = "0.2.0"
+x86_64 = { version = "0.14.8" }
+xmas-elf = "0.8.0"
+
+[dependencies.noto-sans-mono-bitmap]
+version = "0.2.0"
+default-features = false
+features = [
+   "regular",
+   "size_16",
+   "unicode-basic-latin",
+   # required for the fallback char '�'
+   "unicode-specials",
+]
