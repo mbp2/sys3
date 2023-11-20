@@ -16,7 +16,7 @@ impl VirtualAddressOffset {
    }
 }
 
-impl Add<u64> for VirtualAddressOffset {
+impl core::ops::Add<u64> for VirtualAddressOffset {
    type Output = u64;
 
    fn add(self, offset: u64) -> Self::Output {

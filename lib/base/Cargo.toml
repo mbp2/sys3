@@ -2,8 +2,8 @@
 build="build.rs"
 description = "Foundation library for Trident 3"
 edition.workspace = true
-name = "base"
-readme = "../readme.md"
+name = "trident3-base"
+readme = "../../readme.md"
 version.workspace = true
 
 [lib]

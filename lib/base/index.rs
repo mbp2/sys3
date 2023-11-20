@@ -11,3 +11,7 @@ pub mod error;
 pub mod externs;
 pub mod memory;
 pub mod optional;
+
+// IMPORTS //
+
+extern crate alloc as std_alloc;

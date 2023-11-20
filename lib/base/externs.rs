@@ -1,3 +1,4 @@
+/*
 #[link(name = "sys3_libc", kind = "static")]
 extern "C" {
    fn malloc(size: usize) -> *mut c_void;
@@ -5,7 +6,8 @@ extern "C" {
    fn realloc(ptr: *mut c_void, size: usize) -> *mut c_void;
    fn calloc(count: usize, size: usize) -> *mut c_void;
 }
+*/
 
-// MODULES ////////////////////////////////////////////////////////////////////////////////////////
+// IMPORTS //
 
 use core::ffi::c_void;

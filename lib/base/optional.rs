@@ -12,7 +12,7 @@ pub enum Optional<T> {
 }
 
 impl<T> Optional<T> {
-   pub fn into_option(&self) -> Option<T> {
+   pub fn into_option(self) -> Option<T> {
       self.into()
    }
 

@@ -10,4 +10,4 @@ name = "ffsh"
 path = "index.rs"
 
 [dependencies]
-base = { path = "../../lib/base", version = "*" }
+trident3-base.workspace = true

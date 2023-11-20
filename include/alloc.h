@@ -6,14 +6,14 @@
 
 #include <stdint.h>
 
-typedef struct AllocInfo {
+typedef struct info_t {
   int32_t address;
   int32_t size;
 } AllocInfo;
 
-void* malloc(size_t size);
-void free(void* pointer);
-void* realloc(void* pointer, size_t size);
-void* calloc(size_t count, size_t size);
+void* malloc(size_t);
+void free(void*);
+void* realloc(void*, size_t);
+void* calloc(size_t, size_t);
 
 #endif//LIBC_ALLOC_H

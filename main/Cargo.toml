@@ -6,7 +6,9 @@ name = "trident3-main"
 repository.workspace = true
 version.workspace = true
 
-[lib]
-crate-type = ["staticlib"]
+[[bin]]
 name = "t3_main"
 path = "index.rs"
+
+[dependencies]
+springboard-api = { git = "https://github.com/azyklus/springboard" }

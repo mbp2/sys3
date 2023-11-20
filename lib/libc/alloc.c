@@ -72,3 +72,7 @@ void* malloc(size_t size) {
 
    return addr;
 }
+
+void free(void* pointer) {
+
+}

@@ -1,31 +1,44 @@
+[package]
+authors = ["Az <azyklus@disroot.org>"]
+build = "build.rs"
+description.workspace = true
+documentation.workspace = true
+edition.workspace = true
+name="trident3"
+repository.workspace = true
+version.workspace = true
+
+[[bin]]
+name="trident3-local"
+path="index.rs"
+
+[dependencies]
+trident3-base.workspace = true
+ovmf-prebuilt = "0.1.0-alpha.1"
+
+[build-dependencies]
+springboard = { git = "https://github.com/azyklus/springboard" }
+trident3-main = { path = "main", artifact = "bin", target = "x86_64-unknown-none"  }
+
 [workspace]
 resolver = "2"
-default-members = [
-   "main",
-]
 members = [
    "main",
    "bin/ffsh",
    "lib/base",
-   "lib/springboard",
-   "lib/springboard/base",
-   "lib/springboard/builder",
-   "lib/springboard/builder/bin/springboard-efi",
-   "lib/springboard/builder/bin/springboard-legacy"
 ]
 
 [workspace.package]
 description = "An experimental operating system, for science!"
 documentation = "https://mbp2.blog/src/@trident"
 edition = "2021"
-name = "trident3"
 repository = "https://github.com/azyklus/sys3"
-version = "3.0.1"
+version = "3.0.1" # Don't forget to update workspace.dependencies when updating the version field
 
 [workspace.dependencies]
 anyhow = "1.0.75"
-base = { path = "./lib/base", version = "3.0.1" }
 spin = { version = "0.9.8", features=["spin_mutex"] }
+trident3-base = { path = "./lib/base", version = "3.0.1" }
 
 [profile.dev]
 panic = "abort"
