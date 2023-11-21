@@ -2,7 +2,6 @@
 
 pub mod mio;
 pub mod offset;
-pub mod paging;
 
 // EXPORTS //
 
