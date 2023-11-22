@@ -6,7 +6,14 @@ pub trait Error {
 
 // IMPORTS //
 
+#[cfg(not(feature="allocators"))]
 use std_alloc::{
    boxed::Box,
    string::String
+};
+
+#[cfg(feature="allocators")]
+use crate::{
+   string::String,
+   pointer::Unique as Box,
 };

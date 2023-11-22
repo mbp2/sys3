@@ -2,7 +2,7 @@
 pub static HEAP: Mutex<Option<Heap<'static>>> = Mutex::new(None);
 
 pub unsafe fn HeapInit(
-   heapBase: *mut c_void,
+   heapBase: *mut u8,
    heapSize: usize,
    freeLists: &'static mut [*mut FreeBlock],
 ) {
@@ -36,7 +36,7 @@ pub struct Heap<'a> {
    /// The base address of our heap.
    ///
    /// Must be aligned along the boundary of `MIN_HEAP_ALIGN`.
-   heapBase: *mut c_void,
+   heapBase: *mut u8,
 
    /// The size of our heap.
    ///
@@ -69,7 +69,7 @@ unsafe impl<'a> Send for Heap<'a> {}
 
 impl<'a> Heap<'a> {
    pub unsafe fn new(
-      heapBase: *mut c_void,
+      heapBase: *mut u8,
       heapSize: usize,
       freeLists: &mut [*mut FreeBlock],
    ) -> Heap {
@@ -104,8 +104,8 @@ impl<'a> Heap<'a> {
       );
 
       // Zero out our free array pointers.
-      for ptr in freeLists.iter_mut() {
-         *ptr = ptr::null_mut();
+      for pointer in freeLists.iter_mut() {
+         *pointer = ptr::null_mut();
       }
 
       // Store all the info about our heap in our struct.
@@ -120,7 +120,7 @@ impl<'a> Heap<'a> {
       // Insert the entire heap onto the appropriate free array as a
       // single block.
       let order = result
-         .AllocationOrder(heapSize, 1)
+         .allocationOrder(heapSize, 1)
          .expect("Failed to calculate order for root heap block");
 
       result.freeListInsert(order, heapBase);
@@ -134,7 +134,7 @@ impl<'a> Heap<'a> {
    /// we've already allocated.  In particular, it's important to be able
    /// to calculate the same `allocation_size` when freeing memory as we
    /// did when allocating it, or everything will break horribly.
-   pub fn AllocationSize(&self, mut size: usize, align: usize) -> Option<usize> {
+   pub fn allocationSize(&self, mut size: usize, align: usize) -> Option<usize> {
       // Sorry, we don't support weird alignments.
       if !align.PowerOf2() {
          return None;
@@ -170,9 +170,9 @@ impl<'a> Heap<'a> {
    /// The "order" of an allocation is how many times we need to double
    /// `min_block_size` in order to get a large enough block, as well as
    /// the index we use into `free_lists`.
-   pub fn AllocationOrder(&self, size: usize, align: usize) -> Option<usize> {
+   pub fn allocationOrder(&self, size: usize, align: usize) -> Option<usize> {
       self
-         .AllocationSize(size, align)
+         .allocationSize(size, align)
          .map(|s| (s.Log2() - self.minBlockSizeLog2) as usize)
    }
 
@@ -182,21 +182,21 @@ impl<'a> Heap<'a> {
    }
 
    /// Pop a block off the appropriate free array.
-   unsafe fn freeListPop(&mut self, order: usize) -> Option<*mut c_void> {
+   unsafe fn freeListPop(&mut self, order: usize) -> Option<*mut u8> {
       let candidate = self.freeLists[order];
-      if candidate != ptr::null_mut() {
+      return if candidate != ptr::null_mut() {
          self.freeLists[order] = (*candidate).next;
-         Some(candidate as *mut c_void)
+         Some(candidate as *mut u8)
       } else {
          None
-      }
+      };
    }
 
    /// Insert `block` of order `order` onto the appropriate free array.
-   unsafe fn freeListInsert(&mut self, order: usize, block: *mut c_void) {
-      let free_block_ptr = block as *mut FreeBlock;
-      *free_block_ptr = FreeBlock::new(self.freeLists[order]);
-      self.freeLists[order] = free_block_ptr;
+   unsafe fn freeListInsert(&mut self, order: usize, block: *mut u8) {
+      let freePointer = block as *mut FreeBlock;
+      *freePointer = FreeBlock::new(self.freeLists[order]);
+      self.freeLists[order] = freePointer;
    }
 
    /// Attempt to remove a block from our free array, returning true
@@ -208,8 +208,8 @@ impl<'a> Heap<'a> {
    /// because then "nursery generation" allocations would probably tend
    /// to occur at lower addresses and then be faster to find / rule out
    /// finding.
-   unsafe fn freeListRemove(&mut self, order: usize, block: *mut c_void) -> bool {
-      let block_ptr = block as *mut FreeBlock;
+   unsafe fn freeListRemove(&mut self, order: usize, block: *mut u8) -> bool {
+      let blockPointer = block as *mut FreeBlock;
 
       // Yuck, array traversals are gross without recursion.  Here,
       // `*checking` is the pointer we want to check, and `checking` is
@@ -220,7 +220,7 @@ impl<'a> Heap<'a> {
       // Loop until we run out of free blocks.
       while *checking != ptr::null_mut() {
          // Is this the pointer we want to remove from the free array?
-         if *checking == block_ptr {
+         if *checking == blockPointer {
             // Yup, this is the one, so overwrite the value we used to
             // get here with the next one in the sequence.
             *checking = (*(*checking)).next;
@@ -233,14 +233,14 @@ impl<'a> Heap<'a> {
          checking = &mut ((*(*checking)).next);
       }
 
-      false
+      return false;
    }
 
    /// Split a `block` of order `order` down into a block of order
    /// `order_needed`, placing any unused chunks on the free array.
    unsafe fn splitFreeBlock(
       &mut self,
-      block: *mut c_void,
+      block: *mut u8,
       mut order: usize,
       order_needed: usize,
    ) {
@@ -266,9 +266,9 @@ impl<'a> Heap<'a> {
    ///
    /// All allocated memory must be passed to `deallocate` with the same
    /// `size` and `align` parameter, or else horrible things will happen.
-   pub unsafe fn Allocate(&mut self, size: usize, align: usize) -> *mut c_void {
+   pub unsafe fn allocate(&mut self, size: usize, align: usize) -> *mut u8 {
       // Figure out which order block we need.
-      if let Some(order_needed) = self.AllocationOrder(size, align) {
+      if let Some(order_needed) = self.allocationOrder(size, align) {
          // Start with the smallest acceptable block size, and search
          // upwards until we reach blocks the size of the entire heap.
          for order in order_needed..self.freeLists.len() {
@@ -298,7 +298,7 @@ impl<'a> Heap<'a> {
    /// Given a `block` with the specified `order`, find the "buddy" block,
    /// that is, the other half of the block we originally split it from,
    /// and also the block we could potentially merge it with.
-   pub unsafe fn Buddy(&self, order: usize, block: *mut c_void) -> Option<*mut c_void> {
+   pub unsafe fn buddy(&self, order: usize, block: *mut u8) -> Option<*mut u8> {
       let relative = (block as usize) - (self.heapBase as usize);
       let size = self.orderSize(order);
       if size >= self.heapSize {
@@ -314,9 +314,9 @@ impl<'a> Heap<'a> {
    /// Deallocate a block allocated using `allocate`.  Note that the
    /// `old_size` and `align` values must match the values passed to
    /// `allocate`, or our heap will be corrupted.
-   pub unsafe fn Deallocate(&mut self, ptr: *mut c_void, old_size: usize, align: usize) {
+   pub unsafe fn deallocate(&mut self, pointer: *mut u8, oldSize: usize, align: usize) {
       let initial_order = self
-         .AllocationOrder(old_size, align)
+         .allocationOrder(oldSize, align)
          .expect("Tried to dispose of invalid block");
 
       // The fun part: When deallocating a block, we also want to check
@@ -324,10 +324,10 @@ impl<'a> Heap<'a> {
       // is also free, we merge them and continue walking up.
       //
       // `block` is the biggest merged block we have so far.
-      let mut block = ptr;
+      let mut block = pointer;
       for order in initial_order..self.freeLists.len() {
          // Would this block have a buddy?
-         if let Some(buddy) = self.Buddy(order, block) {
+         if let Some(buddy) = self.buddy(order, block) {
             // Is this block's buddy free?
             if self.freeListRemove(order, buddy) {
                // Merge them!  The lower address of the two is the
@@ -351,7 +351,6 @@ use {
    crate::math::PowersOf2,
    core::{
       cmp::{max, min},
-      ffi::c_void,
       mem::size_of,
       ptr,
    },
