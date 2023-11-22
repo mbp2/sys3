@@ -9,7 +9,7 @@ repository.workspace = true
 version.workspace = true
 
 [[bin]]
-name="trident3-local"
+name="t3_local"
 path="index.rs"
 
 [dependencies]
