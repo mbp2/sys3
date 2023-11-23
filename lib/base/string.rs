@@ -2,31 +2,30 @@
 
 /// Represents a growable UTF-8 encoded string.
 pub struct String<A: Allocator = GlobalAllocator> {
-   buf: Array<u8, A>,
+   buffer: Array<u8, A>,
 }
 
 impl<A: Allocator> String<A> {
    /// Initialises an empty String with the specified allocator `A`
    ///
-   /// ```no_run
+   /// ```
    /// use base::alloc::GlobalAllocator;
    /// use base::string::String;
    ///
-   /// fn main()
-   /// {
+   /// fn main() {
    ///   let s = String::new_with(GlobalAllocator);
    /// }
    /// ```
    pub fn new_with(alloc: A) -> Self {
       Self {
-         buf: Array::new_with(alloc),
+         buffer: Array::new_with(alloc),
       }
    }
 
    /// Initialises a `String` from a given `&str` using the specified allocator, `A`.
    ///
    ///
-   /// ```no_run
+   /// ```
    /// use base::alloc::GlobalAllocator;
    /// use base::string::String;
    ///
@@ -44,7 +43,7 @@ impl<A: Allocator> String<A> {
          ptr::copy_nonoverlapping(s.as_ptr(), buf.as_mut_ptr(), slice.len());
       }
 
-      return Self { buf };
+      return Self { buffer: buf };
    }
 
    /// Dereferences to the base `&str`.
@@ -57,7 +56,7 @@ impl<A: Allocator> String<A> {
    pub fn push(&mut self, c: char) {
       let mut bytes = [0u8; 4];
       c.encode_utf8(&mut bytes);
-      self.buf.extend(bytes[0..c.len_utf8()].iter());
+      self.buffer.extend(bytes[0..c.len_utf8()].iter());
    }
 }
 
@@ -66,7 +65,7 @@ impl<A: Allocator> TryFrom<Array<u8, A>> for String<A> {
 
    fn try_from(array: Array<u8, A>) -> Result<Self, Self::Error> {
       str::from_utf8(&array)?;
-      Ok(Self { buf: array })
+      Ok(Self { buffer: array })
    }
 }
 
@@ -135,15 +134,18 @@ impl<A: Allocator> Deref for String<A> {
    /// ```
    #[inline]
    fn deref(&self) -> &Self::Target {
-      unsafe { str::from_utf8_unchecked(&self.buf) }
+      unsafe { str::from_utf8_unchecked(&self.buffer) }
    }
 }
+
+unsafe impl Send for String<GlobalAllocator> {}
+unsafe impl Sync for String<GlobalAllocator> {}
 
 impl<A: Allocator> DerefMut for String<A> {
    /// Dereferences the current `String` into a mutable `&str`.
    #[inline]
    fn deref_mut(&mut self) -> &mut str {
-      unsafe { str::from_utf8_unchecked_mut(&mut self.buf) }
+      unsafe { str::from_utf8_unchecked_mut(&mut self.buffer) }
    }
 }
 
@@ -294,6 +296,9 @@ impl<A: Allocator> DerefMut for StringWide<A> {
       &mut self.buf
    }
 }
+
+unsafe impl Send for StringWide<GlobalAllocator> {}
+unsafe impl Sync for StringWide<GlobalAllocator> {}
 
 // IMPORTS //
 

@@ -61,15 +61,15 @@ pub extern "C" fn __rust_usable_size(size: usize, _align: usize) -> usize {
 }
 
 #[doc(hidden)]
-pub unsafe fn alloc_one<T>(allocator: &mut dyn Allocator) -> Option<NonNull<u8>> {
-   allocator.allocate_aligned(Layout::new::<T>()).map(|ptr| ptr)
+pub unsafe fn alloc_one<T>(allocator: &mut dyn Allocator) -> Option<NonNull<T>> {
+   allocator.allocate_aligned(Layout::new::<T>()).map(|ptr| ptr.cast::<T>())
 }
 
 #[doc(hidden)]
-pub unsafe fn alloc_array<T>(allocator: &mut dyn Allocator, size: usize) -> Option<NonNull<u8>> {
+pub unsafe fn alloc_array<T>(allocator: &mut dyn Allocator, size: usize) -> Option<NonNull<T>> {
    allocator
       .allocate_aligned(Layout::from_type_array::<T>(size))
-      .map(|ptr| ptr)
+      .map(|ptr| ptr.cast::<T>())
 }
 
 #[derive(Debug)]
@@ -96,7 +96,7 @@ where
       return LockedAllocator(Mutex::new(allocator));
    }
 
-   pub fn Lock(&self) -> MutexGuard<A> {
+   pub fn lock(&self) -> MutexGuard<A> {
       return self.0.lock();
    }
 }
@@ -157,11 +157,11 @@ unsafe impl<A: Allocator> Allocator for Mutex<A> {
 
 unsafe impl<A: Allocator> Allocator for LockedAllocator<A> {
    fn allocate(&self, layout: Layout) -> Option<NonNull<u8>> {
-      return self.Lock().allocate(layout);
+      return self.lock().allocate(layout);
    }
 
    unsafe fn deallocate(&self, pointer: *mut u8, layout: Layout) {
-      return self.Lock().deallocate(pointer, layout);
+      return self.lock().deallocate(pointer, layout);
    }
 
    unsafe fn reallocate(
@@ -170,7 +170,7 @@ unsafe impl<A: Allocator> Allocator for LockedAllocator<A> {
       oldSize: usize,
       layout: Layout,
    ) -> Option<NonNull<u8>> {
-      return self.Lock().reallocate(pointer, oldSize, layout);
+      return self.lock().reallocate(pointer, oldSize, layout);
    }
 }
 

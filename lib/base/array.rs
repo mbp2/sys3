@@ -6,10 +6,10 @@ pub struct Array<T, A: Allocator = GlobalAllocator> {
 }
 
 impl<T, A: Allocator> Array<T, A> {
-   pub fn new_with(alloc: A) -> Self {
+   pub fn new_with(allocator: A) -> Self {
       Array {
          size: 0,
-         buf: RawArray::new(alloc),
+         buf: RawArray::new(allocator),
       }
    }
 
@@ -19,7 +19,7 @@ impl<T, A: Allocator> Array<T, A> {
       if new_size < self.size && needs_drop::<T>() {
          for i in new_size..self.size {
             unsafe {
-               drop_in_place(self.buf.pointer.offset(i as isize));
+               drop_in_place(self.buf.pointer.as_ptr().offset(i as isize));
             }
          }
       } else if new_size > self.size {
@@ -29,7 +29,7 @@ impl<T, A: Allocator> Array<T, A> {
 
          for i in self.size..new_size {
             unsafe {
-               self.buf.pointer.offset(i as isize).write(f());
+               self.buf.pointer.as_ptr().offset(i as isize).write(f());
             }
          }
       }
@@ -70,12 +70,12 @@ impl<T, A: Allocator> Array<T, A> {
 
    #[inline]
    pub fn len(&self) -> usize {
-      self.size
+      return self.size;
    }
 
    #[inline]
    pub fn capacity(&self) -> usize {
-      self.buf.capacity
+      return self.buf.capacity;
    }
 
    pub fn push(&mut self, value: T) {
@@ -84,28 +84,28 @@ impl<T, A: Allocator> Array<T, A> {
       }
 
       unsafe {
-         self.buf.pointer.offset(self.size as isize).write(value);
+         self.buf.pointer.as_ptr().offset(self.size as isize).write(value);
       }
 
       self.size += 1;
    }
 
    pub fn pop(&mut self) -> Option<T> {
-      if self.size == 0 {
+      return if self.size == 0 {
          None
       } else {
-         let value = unsafe { self.buf.pointer.offset((self.size - 1) as isize).read() };
+         let value = unsafe { self.buf.pointer.as_ptr().offset((self.size - 1) as isize).read() };
 
          self.size -= 1;
          Some(value)
-      }
+      };
    }
 
    pub fn clear(&mut self) {
       if needs_drop::<T>() {
          unsafe {
             for i in 0..self.size {
-               drop_in_place(self.buf.pointer.offset(i as isize));
+               drop_in_place(self.buf.pointer.as_ptr().offset(i as isize));
             }
          }
       }
@@ -115,7 +115,7 @@ impl<T, A: Allocator> Array<T, A> {
 
    #[inline]
    pub fn is_empty(&self) -> bool {
-      self.size == 0
+      return self.size == 0;
    }
 }
 
@@ -127,7 +127,7 @@ impl<T> Array<T, GlobalAllocator> {
 
 impl<T, A: Allocator> Drop for Array<T, A> {
    fn drop(&mut self) {
-      if !self.buf.pointer.is_null() {
+      if !self.buf.pointer.as_ptr().is_null() {
          self.clear();
       }
    }
@@ -138,13 +138,13 @@ impl<T, A: Allocator> Deref for Array<T, A> {
 
    #[inline]
    fn deref(&self) -> &Self::Target {
-      unsafe { slice::from_raw_parts(self.buf.pointer, self.size) }
+      unsafe { slice::from_raw_parts(self.buf.pointer.as_ptr(), self.size) }
    }
 }
 
 impl<T, A: Allocator> DerefMut for Array<T, A> {
    fn deref_mut(&mut self) -> &mut Self::Target {
-      unsafe { slice::from_raw_parts_mut(self.buf.pointer, self.size) }
+      unsafe { slice::from_raw_parts_mut(self.buf.pointer.as_ptr(), self.size) }
    }
 }
 
@@ -185,7 +185,7 @@ where
 }
 
 pub struct IntoIter<T, A: Allocator> {
-   inner: Array<T, A>,
+   array: Array<T, A>,
    current: usize,
    size: usize,
 }
@@ -194,15 +194,16 @@ impl<T, A: Allocator> Iterator for IntoIter<T, A> {
    type Item = T;
 
    fn next(&mut self) -> Option<T> {
-      if self.current >= self.size {
+      return if self.current >= self.size {
          None
       } else {
          unsafe {
             let index = self.current;
             self.current += 1;
-            Some(read(self.inner.buf.pointer.offset(index as isize)))
+
+            Some(read(self.array.buf.pointer.as_ptr().offset(index as isize)))
          }
-      }
+      };
    }
 
    fn size_hint(&self) -> (usize, Option<usize>) {
@@ -218,33 +219,33 @@ impl<T, A: Allocator> Drop for IntoIter<T, A> {
       if needs_drop::<T>() {
          unsafe {
             for i in self.current..self.size {
-               drop_in_place(self.inner.buf.pointer.offset(i as isize))
+               drop_in_place(self.array.buf.pointer.as_ptr().offset(i as isize))
             }
          }
       }
 
       // Set size of the array to 0 so it doesn't drop anything else.
-      self.inner.size = 0;
+      self.array.size = 0;
    }
 }
 
 pub struct RawArray<T, A: Allocator> {
-   pub pointer: *mut T,
+   pub pointer: NonNull<T>,
    pub capacity: usize,
    pub allocator: A,
-   _phantom: PhantomData<T>,
+   _ghost: PhantomData<T>,
 }
 
 impl<T, A: Allocator> RawArray<T, A> {
    pub fn new(allocator: A) -> Self {
       let capacity = if size_of::<T>() == 0 { !0 } else { 0 };
 
-      Self {
-         pointer: ptr::null_mut(),
+      return RawArray{
+         pointer: NonNull::dangling(),
          capacity,
          allocator,
-         _phantom: PhantomData,
-      }
+         _ghost: PhantomData,
+      };
    }
 
    pub fn reserve(&mut self, new_capacity: usize) {
@@ -252,33 +253,35 @@ impl<T, A: Allocator> RawArray<T, A> {
          return;
       }
 
-      let pointer = unsafe {
+      let mut pointer = unsafe {
          alloc_array::<T>(&mut self.allocator, new_capacity)
             .expect("Allocation error")
-            .as_ptr()
       };
 
       if self.capacity > 0 {
          unsafe {
-            pointer.copy_from(self.pointer as *mut u8, self.capacity);
+            ptr::copy(self.pointer.as_ptr() as *const T, pointer.as_ptr(), self.capacity);
+
             self
                .allocator
-               .deallocate_aligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
+               .deallocate_aligned(
+                  self.pointer.cast::<u8>().as_ptr(),
+                  Layout::from_size(self.capacity)
+               );
          }
       }
 
-      self.pointer = pointer as *mut T;
+      self.pointer = pointer.cast::<T>();
       self.capacity = new_capacity;
    }
 }
 
 impl<T, A: Allocator> Drop for RawArray<T, A> {
    fn drop(&mut self) {
-      if !self.pointer.is_null() {
+      if !self.pointer.as_ptr().is_null() {
          unsafe {
-            self
-               .allocator
-               .deallocate_aligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
+            self.allocator
+               .deallocate_aligned(self.pointer.cast::<u8>().as_ptr(), Layout::from_size(self.capacity));
          }
       }
    }
@@ -571,7 +574,7 @@ use {
       marker::PhantomData,
       mem::{needs_drop, size_of, ManuallyDrop, MaybeUninit},
       ops::{Deref, DerefMut},
-      ptr::{self, drop_in_place, read},
+      ptr::{self, drop_in_place, read, NonNull},
       slice,
    },
 };

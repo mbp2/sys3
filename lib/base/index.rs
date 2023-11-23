@@ -20,6 +20,6 @@ pub mod string;
 
 // IMPORTS //
 
-#[cfg(not(feature = "allocators"))]
+#[cfg(any(feature="std-allocators", not(feature="allocators")))]
 extern crate alloc as std_alloc;
 extern crate core;

@@ -4,7 +4,7 @@ pub trait BaseError: Debug + Display {
    /// The lower-level source of error, if any.
    ///
    /// TODO: provide examples.
-   fn source() -> Option<&(dyn BaseError + 'static)> {
+   fn source(&self) -> Option<&(dyn BaseError + 'static)> {
       return None;
    }
 
@@ -18,13 +18,13 @@ pub trait BaseError: Debug + Display {
    /// Returns a stack backtrace.
    ///
    /// TODO: provide examples.
-   fn backtrace() -> Option<()> {
+   fn backtrace(&self) -> Option<()> {
       return None;
    }
 }
 
 impl<'a, E: BaseError + 'a> From<E> for Box<dyn BaseError + 'a> {
-   /// Converts a type of [`Error`] + [`Send`] + [`Sync`] into a unique pointer of
+   /// Converts a type of [`BaseError`] + [`Send`] + [`Sync`] into a unique pointer of
    /// dyn [`BaseError`] + [`Send`] + [`Sync`].
    fn from(value: E) -> Self {
       return Box::new(value);
@@ -75,7 +75,7 @@ impl<'a> From<&str> for Box<dyn BaseError + Send + Sync + 'a> {
 }
 
 impl From<&str> for Box<dyn BaseError> {
-   /// Converts a [`str`][prim@str] into a unique pointer of dyn [`Error`].
+   /// Converts a [`str`][prim@str] into a unique pointer of dyn [`BaseError`].
    fn from(value: &str) -> Self {
       return From::from(String::from(value));
    }
@@ -95,10 +95,10 @@ mod private {
 
 // IMPORTS //
 
-#[cfg(not(feature = "allocators"))]
+#[cfg(not(feature="allocators"))]
 use std_alloc::{boxed::Box, string::String};
 
-#[cfg(feature = "allocators")]
+#[cfg(feature="allocators")]
 use crate::{pointer::Unique as Box, string::String};
 
 use {
