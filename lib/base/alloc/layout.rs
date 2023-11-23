@@ -41,9 +41,9 @@ impl Layout {
 }
 
 #[derive(Debug)]
-pub struct LayoutErr;
+pub struct LayoutError;
 
-impl Display for LayoutErr {
+impl Display for LayoutError {
    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
       write!(f, "An error occurred for the requested layout")
    }

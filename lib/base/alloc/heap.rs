@@ -1,7 +1,7 @@
 /// Either our global system heap, or `None` if it hasn't yet been allocated.
 pub static HEAP: Mutex<Option<Heap<'static>>> = Mutex::new(None);
 
-pub unsafe fn HeapInit(
+pub unsafe fn build_heap(
    heapBase: *mut u8,
    heapSize: usize,
    freeLists: &'static mut [*mut FreeBlock],

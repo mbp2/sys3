@@ -263,7 +263,7 @@ impl<T, A: Allocator> RawArray<T, A> {
             pointer.copy_from(self.pointer as *mut u8, self.capacity);
             self
                .allocator
-               .deallocateAligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
+               .deallocate_aligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
          }
       }
 
@@ -278,7 +278,7 @@ impl<T, A: Allocator> Drop for RawArray<T, A> {
          unsafe {
             self
                .allocator
-               .deallocateAligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
+               .deallocate_aligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
          }
       }
    }

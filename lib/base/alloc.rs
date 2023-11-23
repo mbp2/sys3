@@ -62,14 +62,23 @@ pub extern "C" fn __rust_usable_size(size: usize, _align: usize) -> usize {
 
 #[doc(hidden)]
 pub unsafe fn alloc_one<T>(allocator: &mut dyn Allocator) -> Option<NonNull<u8>> {
-   allocator.allocateAligned(Layout::new::<T>()).map(|ptr| ptr)
+   allocator.allocate_aligned(Layout::new::<T>()).map(|ptr| ptr)
 }
 
 #[doc(hidden)]
 pub unsafe fn alloc_array<T>(allocator: &mut dyn Allocator, size: usize) -> Option<NonNull<u8>> {
    allocator
-      .allocateAligned(Layout::from_type_array::<T>(size))
+      .allocate_aligned(Layout::from_type_array::<T>(size))
       .map(|ptr| ptr)
+}
+
+#[derive(Debug)]
+pub struct AllocationError;
+
+impl Display for AllocationError {
+   fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+      write!(f, "An error occurred allocating the requested memory")
+   }
 }
 
 /// A global allocator for our program.
@@ -102,7 +111,7 @@ pub unsafe trait Allocator {
       layout: Layout,
    ) -> Option<NonNull<u8>>;
 
-   unsafe fn allocateAligned(&self, layout: Layout) -> Option<NonNull<u8>> {
+   unsafe fn allocate_aligned(&self, layout: Layout) -> Option<NonNull<u8>> {
       let actualSize = layout.size + layout.align - 1 + size_of::<usize>();
 
       let pointer = match self.allocate(Layout::from_size(actualSize)) {
@@ -118,7 +127,7 @@ pub unsafe trait Allocator {
       return Some(NonNull::new_unchecked(alignedPointer as *mut u8));
    }
 
-   unsafe fn deallocateAligned(&self, pointer: *mut u8, layout: Layout) {
+   unsafe fn deallocate_aligned(&self, pointer: *mut u8, layout: Layout) {
       let alignedPointer = pointer as usize;
       let actualP2P = alignedPointer - size_of::<usize>();
       let actualPointer = ptr::read_unaligned(actualP2P as *const usize);
@@ -247,6 +256,7 @@ use {
    core::{
       cell::RefCell,
       cmp::min,
+      fmt::{Display, Formatter},
       mem::size_of,
       ptr::{self, NonNull},
    },
