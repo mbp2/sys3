@@ -54,10 +54,10 @@ impl<T, A: Allocator> Array<T, A> {
    }
 
    fn grow_auto(&mut self) {
-      let single_layout = Layout::from_type::<T>();
+      let single_layout = Layout::new::<T>();
 
       let old_capacity_bytes = self.buf.capacity * single_layout.size;
-      assert!(old_capacity_bytes <= (core::usize::MAX / 4));
+      assert!(old_capacity_bytes <= (usize::MAX / 4));
 
       let new_capacity = if self.buf.capacity == 0 {
          1
@@ -231,18 +231,18 @@ impl<T, A: Allocator> Drop for IntoIter<T, A> {
 pub struct RawArray<T, A: Allocator> {
    pub pointer: *mut T,
    pub capacity: usize,
-   pub alloc: A,
+   pub allocator: A,
    _phantom: PhantomData<T>,
 }
 
 impl<T, A: Allocator> RawArray<T, A> {
-   pub fn new(alloc: A) -> Self {
+   pub fn new(allocator: A) -> Self {
       let capacity = if size_of::<T>() == 0 { !0 } else { 0 };
 
       Self {
          pointer: ptr::null_mut(),
          capacity,
-         alloc,
+         allocator,
          _phantom: PhantomData,
       }
    }
@@ -252,22 +252,22 @@ impl<T, A: Allocator> RawArray<T, A> {
          return;
       }
 
-      let ptr = unsafe {
-         alloc_array::<T>(&mut self.alloc, new_capacity)
+      let pointer = unsafe {
+         alloc_array::<T>(&mut self.allocator, new_capacity)
             .expect("Allocation error")
             .as_ptr()
       };
 
       if self.capacity > 0 {
          unsafe {
-            ptr.copy_from(self.pointer, self.capacity);
+            pointer.copy_from(self.pointer as *mut u8, self.capacity);
             self
-               .alloc
-               .dealloc_aligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
+               .allocator
+               .deallocateAligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
          }
       }
 
-      self.pointer = ptr;
+      self.pointer = pointer as *mut T;
       self.capacity = new_capacity;
    }
 }
@@ -277,8 +277,8 @@ impl<T, A: Allocator> Drop for RawArray<T, A> {
       if !self.pointer.is_null() {
          unsafe {
             self
-               .alloc
-               .dealloc_aligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
+               .allocator
+               .deallocateAligned(self.pointer as *mut u8, Layout::from_size(self.capacity));
          }
       }
    }

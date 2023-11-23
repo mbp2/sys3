@@ -39,7 +39,7 @@ impl PowersOf2 for usize {
       let result = match v {
          Wrapping(v) => v,
       };
-      assert!(result.is_power_of_2());
+      assert!(result.PowerOf2());
       assert!(result >= self && self > result >> 1);
       result
    }

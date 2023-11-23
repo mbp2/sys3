@@ -58,17 +58,17 @@ pub extern "C" fn __rust_usable_size(size: usize, _align: usize) -> usize {
 }
 
 #[doc(hidden)]
-pub unsafe fn alloc_one<T>(alloc: &mut dyn Allocator) -> Option<NonNull<u8>> {
-   alloc
-      .allocateAligned(Layout::from_type::<T>())
-      .map(|ptr| ptr.cast::<T>())
+pub unsafe fn alloc_one<T>(allocator: &mut dyn Allocator) -> Option<NonNull<u8>> {
+   allocator
+      .allocateAligned(Layout::new::<T>())
+      .map(|ptr| ptr)
 }
 
 #[doc(hidden)]
-pub unsafe fn alloc_array<T>(alloc: &mut dyn Allocator, size: usize) -> Option<NonNull<u8>> {
-   alloc
+pub unsafe fn alloc_array<T>(allocator: &mut dyn Allocator, size: usize) -> Option<NonNull<u8>> {
+   allocator
       .allocateAligned(Layout::from_type_array::<T>(size))
-      .map(|ptr| ptr.cast::<T>())
+      .map(|ptr| ptr)
 }
 
 /// A global allocator for our program.
@@ -96,9 +96,9 @@ pub unsafe trait Allocator {
    unsafe fn reallocate(&self, pointer: *mut u8, oldSize: usize, layout: Layout) -> Option<NonNull<u8>>;
 
    unsafe fn allocateAligned(&self, layout: Layout) -> Option<NonNull<u8>> {
-      let actualSize = layout.size() + layout.align() - 1 + size_of::<usize>();
+      let actualSize = layout.size + layout.align - 1 + size_of::<usize>();
 
-      let pointer = match self.alloc(Layout::from_size(actualSize)) {
+      let pointer = match self.allocate(Layout::from_size(actualSize)) {
          Some(p) => p.as_ptr() as usize,
          None => return None,
       };
@@ -162,7 +162,7 @@ unsafe impl<A: Allocator> Allocator for &RefCell<A> {
    }
 }
 
-unsafe impl<A: Allocator> Allocator for GlobalAllocator {
+unsafe impl Allocator for GlobalAllocator {
    fn allocate(&self, layout: Layout) -> Option<NonNull<u8>> {
       return Some(NonNull::new(__rust_allocate(layout.size, layout.align)).unwrap());
    }
