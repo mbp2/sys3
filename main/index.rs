@@ -2,6 +2,7 @@
 #![no_main]
 #![no_std]
 
+#[doc(hidden)]
 static BOOTLOADER_CONFIG: BootloaderConfig =
    {
       let config = BootloaderConfig::new_default();
@@ -9,7 +10,13 @@ static BOOTLOADER_CONFIG: BootloaderConfig =
    };
 
 /// System entry point.
-pub extern "C" fn Main(info: &'static mut BootInfo) -> ! {
+pub fn Main(info: &'static mut BootInfo) -> ! {
+   loop {}
+}
+
+/// This function is called on compiler or runtime panic.
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
    loop {}
 }
 
@@ -17,15 +24,18 @@ springboard_api::entry_point!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 
-pub mod panic;
 /// CPU exception handling.
+///
+/// Currently only x86(_64) interrupts are supported, however ARM and RISC-V interrupts will be
+/// implemented in the future as part of platform availability expansion efforts.
 pub mod interrupts;
 
 // IMPORTS //
 
-extern crate base;
+#[macro_use] extern crate base;
 
 use {
    base::alloc::heap,
+   core::panic::PanicInfo,
    springboard_api::{BootInfo, BootloaderConfig}
 };
