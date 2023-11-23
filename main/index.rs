@@ -9,7 +9,7 @@ static BOOTLOADER_CONFIG: BootloaderConfig =
    };
 
 /// System entry point.
-pub fn Main(info: &'static mut BootInfo) -> ! {
+pub extern "C" fn Main(info: &'static mut BootInfo) -> ! {
    loop {}
 }
 
@@ -18,6 +18,8 @@ springboard_api::entry_point!(Main, config = &BOOTLOADER_CONFIG);
 // MODULES //
 
 pub mod panic;
+/// CPU exception handling.
+pub mod interrupts;
 
 // IMPORTS //
 
