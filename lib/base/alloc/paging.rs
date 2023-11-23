@@ -4,8 +4,6 @@ pub const PAGE_ORDER: usize = 12;
 
 // BUDDY ALLOCATOR //
 
-
-
 // BEST-FIT ALLOCATOR //
 // TODO: implement best-fit allocator.
 

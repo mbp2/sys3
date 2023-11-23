@@ -11,22 +11,23 @@
 pub struct Unique<T: ?Sized, A: Allocator = GlobalAllocator> {
    pointer: NonNull<T>,
    allocator: A,
-   _ghost: PhantomData<T>
+   _ghost: PhantomData<T>,
 }
 
 impl<T, A: Allocator> Unique<T, A> {
    pub fn new_with(value: T, mut allocator: A) -> Self {
-      let mut pointer = unsafe{
-         alloc_one::<T>(&mut allocator)
-            .expect("allocation failure")
-            .cast::<T>()
-      };
+      let mut pointer =
+         unsafe {
+            alloc_one::<T>(&mut allocator)
+               .expect("allocation failure")
+               .cast::<T>()
+         };
 
-      unsafe{
+      unsafe {
          write::<T>(pointer.as_mut(), value);
       }
 
-      return Unique{
+      return Unique {
          pointer,
          allocator,
          _ghost: PhantomData,
@@ -34,13 +35,13 @@ impl<T, A: Allocator> Unique<T, A> {
    }
 
    pub fn pin_with(value: T, allocator: A) -> Pin<Self> {
-      return unsafe{ Pin::new_unchecked(Self::new_with(value, allocator)) };
+      return unsafe { Pin::new_unchecked(Self::new_with(value, allocator)) };
    }
 }
 
 impl<T: ?Sized, A: Allocator> Unique<T, A> {
    pub unsafe fn from_raw_with(pointer: NonNull<T>, allocator: A) -> Self {
-      return Unique{
+      return Unique {
          pointer,
          allocator,
          _ghost: PhantomData,
@@ -49,8 +50,8 @@ impl<T: ?Sized, A: Allocator> Unique<T, A> {
 
    pub fn leak<'a>(unique: Unique<T, A>) -> &'a mut T
    where
-      A: 'a {
-      let reference = unsafe{ &mut *unique.pointer.as_ptr() };
+      A: 'a, {
+      let reference = unsafe { &mut *unique.pointer.as_ptr() };
       core::mem::forget(unique);
 
       return reference;
@@ -79,13 +80,13 @@ impl<T: ?Sized, A: Allocator> Deref for Unique<T, A> {
 
    #[inline]
    fn deref(&self) -> &Self::Target {
-      return unsafe{ self.pointer.as_ref() };
+      return unsafe { self.pointer.as_ref() };
    }
 }
 
 impl<T: ?Sized, A: Allocator> DerefMut for Unique<T, A> {
    fn deref_mut(&mut self) -> &mut Self::Target {
-      return unsafe{ self.pointer.as_mut() };
+      return unsafe { self.pointer.as_mut() };
    }
 }
 
@@ -119,12 +120,14 @@ impl<T: ?Sized, A: Allocator> BorrowMut<T> for Unique<T, A> {
 
 impl<T: ?Sized, A: Allocator> Drop for Unique<T, A> {
    fn drop(&mut self) {
-      let size = unsafe{ size_of_val(self.pointer.as_ref()) };
+      let size = unsafe { size_of_val(self.pointer.as_ref()) };
       let layout = Layout::from_size(size);
 
-      unsafe{
+      unsafe {
          drop_in_place(self.pointer.as_ptr());
-         self.allocator.deallocate(self.pointer.cast().as_ptr(), layout);
+         self
+            .allocator
+            .deallocate(self.pointer.cast().as_ptr(), layout);
       }
    }
 }
@@ -136,9 +139,7 @@ impl<T: ?Sized, A: Allocator> Unpin for Unique<T, A> {}
 // IMPORTS //
 
 use {
-   crate::alloc::{
-      alloc_one, Allocator, GlobalAllocator, Layout
-   },
+   crate::alloc::{alloc_one, Allocator, GlobalAllocator, Layout},
    core::{
       borrow::{Borrow, BorrowMut},
       convert::{AsMut, AsRef},

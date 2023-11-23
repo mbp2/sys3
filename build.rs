@@ -22,8 +22,6 @@ fn main() {
 // IMPORTS //
 
 use {
-   springboard::{
-      BiosBoot, UefiBoot,
-   },
-   std::path::PathBuf
+   springboard::{BiosBoot, UefiBoot},
+   std::path::PathBuf,
 };

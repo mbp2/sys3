@@ -65,7 +65,4 @@ impl PowersOf2 for usize {
 
 // IMPORTS //
 
-use core::{
-   num::Wrapping,
-   mem::size_of,
-};
+use core::{mem::size_of, num::Wrapping};

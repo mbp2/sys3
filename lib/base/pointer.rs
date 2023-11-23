@@ -5,6 +5,4 @@ pub mod unique;
 
 // EXPORTS //
 
-pub use self::{
-   unique::Unique,
-};
+pub use self::unique::Unique;

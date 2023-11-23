@@ -68,11 +68,7 @@ pub struct Heap<'a> {
 unsafe impl<'a> Send for Heap<'a> {}
 
 impl<'a> Heap<'a> {
-   pub unsafe fn new(
-      heapBase: *mut u8,
-      heapSize: usize,
-      freeLists: &mut [*mut FreeBlock],
-   ) -> Heap {
+   pub unsafe fn new(heapBase: *mut u8, heapSize: usize, freeLists: &mut [*mut FreeBlock]) -> Heap {
       // The heap base must not be null.
       assert_ne!(heapBase, ptr::null_mut());
 
@@ -238,12 +234,7 @@ impl<'a> Heap<'a> {
 
    /// Split a `block` of order `order` down into a block of order
    /// `order_needed`, placing any unused chunks on the free array.
-   unsafe fn splitFreeBlock(
-      &mut self,
-      block: *mut u8,
-      mut order: usize,
-      order_needed: usize,
-   ) {
+   unsafe fn splitFreeBlock(&mut self, block: *mut u8, mut order: usize, order_needed: usize) {
       // Get the size of our starting block.
       let mut size_to_split = self.orderSize(order);
 

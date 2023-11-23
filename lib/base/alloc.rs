@@ -2,7 +2,8 @@
 #[no_mangle]
 pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
    unsafe {
-      HEAP.lock()
+      HEAP
+         .lock()
          .as_mut()
          .expect("must initialise heap before calling")
          .allocate(size, align)
@@ -13,7 +14,9 @@ pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
 #[no_mangle]
 pub extern "C" fn __rust_deallocate(pointer: *mut u8, oldSize: usize, align: usize) {
    unsafe {
-      HEAP.lock().as_mut()
+      HEAP
+         .lock()
+         .as_mut()
          .expect("must initialise heap before calling")
          .deallocate(pointer, oldSize, align)
    }
@@ -35,7 +38,7 @@ pub extern "C" fn __rust_reallocate(
 
       __rust_deallocate(pointer, oldSize, align);
       newPointer
-   }
+   };
 }
 
 /// We do not support in-place reallocation, so just return `oldSize`.
@@ -59,9 +62,7 @@ pub extern "C" fn __rust_usable_size(size: usize, _align: usize) -> usize {
 
 #[doc(hidden)]
 pub unsafe fn alloc_one<T>(allocator: &mut dyn Allocator) -> Option<NonNull<u8>> {
-   allocator
-      .allocateAligned(Layout::new::<T>())
-      .map(|ptr| ptr)
+   allocator.allocateAligned(Layout::new::<T>()).map(|ptr| ptr)
 }
 
 #[doc(hidden)]
@@ -80,7 +81,8 @@ pub struct LockedAllocator<A: Allocator>(pub Mutex<A>);
 
 impl<A> LockedAllocator<A>
 where
-   A: Allocator {
+   A: Allocator,
+{
    pub const fn new(allocator: A) -> Self {
       return LockedAllocator(Mutex::new(allocator));
    }
@@ -93,7 +95,12 @@ where
 pub unsafe trait Allocator {
    fn allocate(&self, layout: Layout) -> Option<NonNull<u8>>;
    unsafe fn deallocate(&self, pointer: *mut u8, layout: Layout);
-   unsafe fn reallocate(&self, pointer: *mut u8, oldSize: usize, layout: Layout) -> Option<NonNull<u8>>;
+   unsafe fn reallocate(
+      &self,
+      pointer: *mut u8,
+      oldSize: usize,
+      layout: Layout,
+   ) -> Option<NonNull<u8>>;
 
    unsafe fn allocateAligned(&self, layout: Layout) -> Option<NonNull<u8>> {
       let actualSize = layout.size + layout.align - 1 + size_of::<usize>();
@@ -129,7 +136,12 @@ unsafe impl<A: Allocator> Allocator for Mutex<A> {
       self.lock().deallocate(pointer, layout);
    }
 
-   unsafe fn reallocate(&self, pointer: *mut u8, oldSize: usize, layout: Layout) -> Option<NonNull<u8>> {
+   unsafe fn reallocate(
+      &self,
+      pointer: *mut u8,
+      oldSize: usize,
+      layout: Layout,
+   ) -> Option<NonNull<u8>> {
       return self.lock().reallocate(pointer, oldSize, layout);
    }
 }
@@ -143,7 +155,12 @@ unsafe impl<A: Allocator> Allocator for LockedAllocator<A> {
       return self.Lock().deallocate(pointer, layout);
    }
 
-   unsafe fn reallocate(&self, pointer: *mut u8, oldSize: usize, layout: Layout) -> Option<NonNull<u8>> {
+   unsafe fn reallocate(
+      &self,
+      pointer: *mut u8,
+      oldSize: usize,
+      layout: Layout,
+   ) -> Option<NonNull<u8>> {
       return self.Lock().reallocate(pointer, oldSize, layout);
    }
 }
@@ -157,7 +174,12 @@ unsafe impl<A: Allocator> Allocator for &RefCell<A> {
       return self.borrow_mut().deallocate(pointer, layout);
    }
 
-   unsafe fn reallocate(&self, pointer: *mut u8, oldSize: usize, layout: Layout) -> Option<NonNull<u8>> {
+   unsafe fn reallocate(
+      &self,
+      pointer: *mut u8,
+      oldSize: usize,
+      layout: Layout,
+   ) -> Option<NonNull<u8>> {
       return self.borrow_mut().reallocate(pointer, oldSize, layout);
    }
 }
@@ -171,8 +193,21 @@ unsafe impl Allocator for GlobalAllocator {
       __rust_deallocate(pointer, layout.size, layout.align);
    }
 
-   unsafe fn reallocate(&self, pointer: *mut u8, oldSize: usize, layout: Layout) -> Option<NonNull<u8>> {
-      return Some(NonNull::new(__rust_reallocate(pointer, oldSize, layout.size, layout.align)).unwrap());
+   unsafe fn reallocate(
+      &self,
+      pointer: *mut u8,
+      oldSize: usize,
+      layout: Layout,
+   ) -> Option<NonNull<u8>> {
+      return Some(
+         NonNull::new(__rust_reallocate(
+            pointer,
+            oldSize,
+            layout.size,
+            layout.align,
+         ))
+         .unwrap(),
+      );
    }
 }
 
@@ -203,24 +238,17 @@ pub mod paging;
 
 // EXPORTS //
 
-pub use self::{
-   layout::Layout,
-};
+pub use self::layout::Layout;
 
 // IMPORTS //
 
 use {
-   self::{
-      heap::HEAP,
-   },
+   self::heap::HEAP,
    core::{
       cell::RefCell,
       cmp::min,
       mem::size_of,
-      ptr::{
-         self,
-         NonNull
-      },
+      ptr::{self, NonNull},
    },
    spin::{Mutex, MutexGuard},
 };

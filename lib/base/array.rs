@@ -14,8 +14,8 @@ impl<T, A: Allocator> Array<T, A> {
    }
 
    pub fn resize_with<F>(&mut self, new_size: usize, f: F)
-      where
-         F: Fn() -> T, {
+   where
+      F: Fn() -> T, {
       if new_size < self.size && needs_drop::<T>() {
          for i in new_size..self.size {
             unsafe {
@@ -38,14 +38,14 @@ impl<T, A: Allocator> Array<T, A> {
    }
 
    pub fn resize(&mut self, new_size: usize, value: T)
-      where
-         T: Clone, {
+   where
+      T: Clone, {
       self.resize_with(new_size, || value.clone());
    }
 
    pub fn resize_default(&mut self, new_size: usize)
-      where
-         T: Default, {
+   where
+      T: Default, {
       self.resize_with(new_size, || T::default());
    }
 
@@ -150,8 +150,8 @@ impl<T, A: Allocator> DerefMut for Array<T, A> {
 
 impl<T, A: Allocator> Extend<T> for Array<T, A> {
    fn extend<I>(&mut self, iter: I)
-      where
-         I: IntoIterator<Item=T>, {
+   where
+      I: IntoIterator<Item = T>, {
       for e in iter {
          self.push(e);
       }
@@ -159,12 +159,12 @@ impl<T, A: Allocator> Extend<T> for Array<T, A> {
 }
 
 impl<'a, T: 'a, A: Allocator> Extend<&'a T> for Array<T, A>
-   where
-      T: Clone,
+where
+   T: Clone,
 {
    fn extend<I>(&mut self, iter: I)
-      where
-         I: IntoIterator<Item=&'a T>, {
+   where
+      I: IntoIterator<Item = &'a T>, {
       for e in iter {
          self.push(e.clone());
       }
@@ -172,12 +172,12 @@ impl<'a, T: 'a, A: Allocator> Extend<&'a T> for Array<T, A>
 }
 
 impl<T, A: Allocator> FromIterator<T> for Array<T, A>
-   where
-      A: Default,
+where
+   A: Default,
 {
    fn from_iter<I>(iter: I) -> Self
-      where
-         I: IntoIterator<Item=T>, {
+   where
+      I: IntoIterator<Item = T>, {
       let mut array = Array::new_with(A::default());
       array.extend(iter);
       return array;
@@ -293,25 +293,25 @@ pub trait StackArray {
 }
 
 enum SmallArrayData<S, A = GlobalAllocator>
-   where
-      S: StackArray,
-      A: Allocator, {
+where
+   S: StackArray,
+   A: Allocator, {
    Stack(usize, ManuallyDrop<S>),
    Heap(Array<S::Element, A>),
 }
 
 pub struct SmallArray<S, A = GlobalAllocator>
-   where
-      S: StackArray,
-      A: Allocator, {
+where
+   S: StackArray,
+   A: Allocator, {
    alloc: Option<A>,
    data: SmallArrayData<S, A>,
 }
 
 impl<S, A> SmallArray<S, A>
-   where
-      S: StackArray,
-      A: Allocator,
+where
+   S: StackArray,
+   A: Allocator,
 {
    #[inline]
    pub fn len(&self) -> usize {
@@ -426,8 +426,8 @@ impl<S, A> SmallArray<S, A>
    }
 
    pub fn resize_with<F>(&mut self, new_size: usize, f: F)
-      where
-         F: Fn() -> S::Element, {
+   where
+      F: Fn() -> S::Element, {
       self.reserve(new_size);
 
       let (ptr, len, _) = self.get_infos_mut();
@@ -455,22 +455,22 @@ impl<S, A> SmallArray<S, A>
    }
 
    pub fn resize(&mut self, new_size: usize, value: S::Element)
-      where
-         S::Element: Clone, {
+   where
+      S::Element: Clone, {
       self.resize_with(new_size, || value.clone());
    }
 
    pub fn resize_default(&mut self, new_size: usize)
-      where
-         S::Element: Default, {
+   where
+      S::Element: Default, {
       self.resize_with(new_size, || S::Element::default());
    }
 }
 
 impl<S, A> Drop for SmallArray<S, A>
-   where
-      S: StackArray,
-      A: Allocator,
+where
+   S: StackArray,
+   A: Allocator,
 {
    fn drop(&mut self) {
       self.clear();
@@ -478,9 +478,9 @@ impl<S, A> Drop for SmallArray<S, A>
 }
 
 impl<S, A> Deref for SmallArray<S, A>
-   where
-      S: StackArray,
-      A: Allocator,
+where
+   S: StackArray,
+   A: Allocator,
 {
    type Target = [S::Element];
 
@@ -492,9 +492,9 @@ impl<S, A> Deref for SmallArray<S, A>
 }
 
 impl<S, A> DerefMut for SmallArray<S, A>
-   where
-      S: StackArray,
-      A: Allocator,
+where
+   S: StackArray,
+   A: Allocator,
 {
    #[inline]
    fn deref_mut(&mut self) -> &mut Self::Target {
@@ -504,8 +504,8 @@ impl<S, A> DerefMut for SmallArray<S, A>
 }
 
 impl<S> SmallArray<S, GlobalAllocator>
-   where
-      S: StackArray,
+where
+   S: StackArray,
 {
    pub fn new() -> Self {
       Self::new_with(GlobalAllocator)
@@ -513,43 +513,41 @@ impl<S> SmallArray<S, GlobalAllocator>
 }
 
 impl<T, S, A: Allocator> Extend<T> for SmallArray<S, A>
-   where
-      T: Borrow<S::Element>,
-      S: StackArray,
-      S::Element: Clone,
+where
+   T: Borrow<S::Element>,
+   S: StackArray,
+   S::Element: Clone,
 {
    fn extend<I>(&mut self, iter: I)
-      where
-         I: IntoIterator<Item=T>, {
+   where
+      I: IntoIterator<Item = T>, {
       for e in iter {
          self.push(e.borrow().clone());
       }
    }
 }
 
-macro impl_stack_array {
-($len:expr, $name:ident) => {
-      impl<T> StackArray for [T; $len] {
-         type Element = T;
+macro impl_stack_array($len:expr, $name:ident) {
+   impl<T> StackArray for [T; $len] {
+      type Element = T;
 
-         #[inline]
-         fn len(&self) -> usize {
-            $len
-         }
-
-         #[inline]
-         fn as_ptr(&self) -> *const Self::Element {
-            (self as &[Self::Element]).as_ptr()
-         }
-
-         #[inline]
-         fn as_mut_ptr(&mut self) -> *mut Self::Element {
-            (self as &mut [Self::Element]).as_mut_ptr()
-         }
+      #[inline]
+      fn len(&self) -> usize {
+         $len
       }
 
-      pub type $name<T, A = GlobalAllocator> = SmallArray<[T; $len], A>;
+      #[inline]
+      fn as_ptr(&self) -> *const Self::Element {
+         (self as &[Self::Element]).as_ptr()
+      }
+
+      #[inline]
+      fn as_mut_ptr(&mut self) -> *mut Self::Element {
+         (self as &mut [Self::Element]).as_mut_ptr()
+      }
    }
+
+   pub type $name<T, A = GlobalAllocator> = SmallArray<[T; $len], A>;
 }
 
 // @Todo Re-do this when const generics
@@ -566,12 +564,7 @@ impl_stack_array!(128, SmallArray128);
 // IMPORTS //
 
 use {
-   crate::alloc::{
-      alloc_array,
-      Allocator,
-      GlobalAllocator,
-      Layout,
-   },
+   crate::alloc::{alloc_array, Allocator, GlobalAllocator, Layout},
    core::{
       borrow::Borrow,
       iter::{FromIterator, IntoIterator},

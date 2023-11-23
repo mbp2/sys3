@@ -161,9 +161,9 @@ impl<A: Allocator> fmt::Debug for String<A> {
 }
 
 impl<A, T> PartialEq<T> for String<A>
-   where
-      A: Allocator,
-      T: AsRef<str>,
+where
+   A: Allocator,
+   T: AsRef<str>,
 {
    #[inline]
    fn eq(&self, other: &T) -> bool {
@@ -308,7 +308,6 @@ use {
       fmt,
       hash::{Hash, Hasher},
       ops::{Deref, DerefMut},
-      ptr,
-      str,
+      ptr, str,
    },
 };
