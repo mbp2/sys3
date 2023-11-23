@@ -904,7 +904,6 @@ version = "3.0.1"
 dependencies = [
  "ovmf-prebuilt",
  "springboard",
- "trident3-base",
  "trident3-main",
 ]
 
@@ -923,6 +922,7 @@ name = "trident3-main"
 version = "3.0.1"
 dependencies = [
  "springboard-api",
+ "trident3-base",
 ]
 
 [[package]]

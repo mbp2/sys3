@@ -15,10 +15,15 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
 springboard_api::entry_point!(Main, config = &BOOTLOADER_CONFIG);
 
-// IMPORTS //
-
-use springboard_api::{BootInfo, BootloaderConfig};
-
 // MODULES //
 
 pub mod panic;
+
+// IMPORTS //
+
+extern crate base;
+
+use {
+   base::alloc::heap,
+   springboard_api::{BootInfo, BootloaderConfig}
+};
