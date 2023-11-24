@@ -1,5 +1,3 @@
-//! [`String`][crate::string::String]: A growable UTF-8 string.
-
 /// Represents a growable UTF-8 encoded string.
 pub struct String<A: Allocator = GlobalAllocator> {
    buffer: Array<u8, A>,
