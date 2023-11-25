@@ -1,5 +1,8 @@
 #![allow(nonstandard_style)]
-#![feature(abi_x86_interrupt)]
+#![feature(
+   abi_x86_interrupt,
+   const_mut_refs
+)]
 #![no_main]
 #![no_std]
 
