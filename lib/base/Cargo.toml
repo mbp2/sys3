@@ -11,12 +11,17 @@ name="base"
 path="index.rs"
 
 [dependencies]
-bitflags = "1.1.0"
+bitflags = "2.4.1"
 cfg-if = "1.0.0"
-rustversion = "1.0.5"
-rustc-std-workspace-core = { version="1.0.0", optional=true }
 compiler_builtins = { version="0.1", optional=true }
+conquer-once = { version="0.4.0", default-features=false }
+lazy_static = { version="1.4.0", features=["spin_no_std"] }
+log = "0.4.20"
+rustc-std-workspace-core = { version="1.0.0", optional=true }
+rustversion = "1.0.5"
 spin.workspace = true
+spinning_top.workspace = true
+springboard-api.workspace = true
 
 [dependencies.noto-sans-mono-bitmap]
 version = "0.2.0"

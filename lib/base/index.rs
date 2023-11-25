@@ -41,6 +41,9 @@ pub mod pointer;
 #[cfg(feature = "allocators")]
 pub mod string;
 
+/// Facilities for interacting with standard input/output.
+pub mod terminal;
+
 /// A pair of UART (universal asynchronous receiver-transmitter) implementations, one memory-mapped,
 /// and the other mapped to serial hardware.
 ///
@@ -57,5 +60,11 @@ pub mod uart;
 extern crate alloc as std_alloc;
 extern crate bitflags;
 extern crate cfg_if;
+extern crate conquer_once;
 extern crate core;
+extern crate lazy_static;
+extern crate log;
+extern crate rustversion;
 extern crate spin;
+extern crate spinning_top;
+extern crate springboard_api;
