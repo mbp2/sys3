@@ -64,7 +64,6 @@ pub mod interrupts;
 extern crate springboard_api;
 extern crate x86_64;
 
-use core::ops::Deref;
 use {
    base::terminal,
    core::panic::PanicInfo,
