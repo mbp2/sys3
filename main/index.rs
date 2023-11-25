@@ -1,4 +1,5 @@
 #![allow(nonstandard_style)]
+#![feature(abi_x86_interrupt)]
 #![no_main]
 #![no_std]
 
@@ -11,6 +12,8 @@ static BOOTLOADER_CONFIG: BootloaderConfig =
 
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
+   interrupts::initIDT();
+
    loop {}
 }
 
@@ -33,6 +36,8 @@ pub mod interrupts;
 // IMPORTS //
 
 #[macro_use] extern crate base;
+extern crate springboard_api;
+extern crate x86_64;
 
 use {
    base::alloc::heap,
