@@ -9,9 +9,12 @@ pub fn initIDT() {
    }
 }
 
-extern "x86-interrupt" fn breakpoint(frame: InterruptStackFrame) {}
+extern "x86-interrupt" fn breakpoint(frame: InterruptStackFrame) {
+   println!("EXCEPTION: BREAKPOINT\n{:#?}", frame);
+}
 
-extern "x86-interrupt" fn double_fault(frame: InterruptStackFrame, code: u64) -> ! {
+extern "x86-interrupt" fn double_fault(frame: InterruptStackFrame, _: u64) -> ! {
+   println!("EXCEPTION: DOUBLE FAULT\n{:#?}", frame);
    loop{}
 }
 
