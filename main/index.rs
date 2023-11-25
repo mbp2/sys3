@@ -12,7 +12,21 @@ static BOOTLOADER_CONFIG: BootloaderConfig =
 
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
+   let fb_info = info.framebuffer
+      .as_ref().clone().unwrap().info();
+
+   let framebuffer = info.framebuffer.as_mut().unwrap();
+
+   // Initialise the interrupt descriptor table.
    interrupts::initIDT();
+
+   // Initialise logging facilities.
+   let buffer = framebuffer.buffer_mut();
+   /*TODO: this currently prints an invalid sequence, uncomment when fixed.
+   terminal::init_writer(buffer, fb_info, true, false);
+
+   println!("Hello world!");
+    */
 
    loop {}
 }
@@ -33,14 +47,17 @@ springboard_api::entry_point!(Main, config = &BOOTLOADER_CONFIG);
 /// implemented in the future as part of platform availability expansion efforts.
 pub mod interrupts;
 
+pub mod logging;
+
 // IMPORTS //
 
 #[macro_use] extern crate base;
 extern crate springboard_api;
 extern crate x86_64;
 
+use core::ops::Deref;
 use {
-   base::alloc::heap,
+   base::terminal,
    core::panic::PanicInfo,
    springboard_api::{BootInfo, BootloaderConfig}
 };

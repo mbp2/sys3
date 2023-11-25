@@ -37,6 +37,8 @@ version = "3.0.1" # Don't forget to update workspace.dependencies when updating 
 [workspace.dependencies]
 anyhow = "1.0.75"
 spin = { version = "0.9.8", features=["spin_mutex"] }
+spinning_top = "0.3.0"
+springboard-api = { git = "https://github.com/azyklus/springboard" }
 trident3-base = { path = "./lib/base", version = "3.0.1", features = ["allocators"] }
 
 [profile.dev]

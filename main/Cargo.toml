@@ -11,6 +11,6 @@ name = "t3_main"
 path = "index.rs"
 
 [dependencies]
-springboard-api = { git = "https://github.com/azyklus/springboard" }
+springboard-api.workspace = true
 trident3-base.workspace = true
 x86_64 = "0.14.11"
