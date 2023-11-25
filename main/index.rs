@@ -20,7 +20,7 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
    let framebuffer = info.framebuffer.as_mut().unwrap();
 
-   /// Initialise the global descriptor table.
+   // Initialise the global descriptor table.
    gdt::initGDT();
 
    // Initialise the interrupt descriptor table.
