@@ -17,6 +17,9 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
    let framebuffer = info.framebuffer.as_mut().unwrap();
 
+   /// Initialise the global descriptor table.
+   gdt::initGDT();
+
    // Initialise the interrupt descriptor table.
    interrupts::initIDT();
 
@@ -41,13 +44,16 @@ springboard_api::entry_point!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 
+/// The Global Descriptor Table (GDT) is a relic that was used for memory segmentation before
+/// paging became the de facto standard. However, it is still needed in 64-bit mode for various
+/// things, such as kernel/user mode configuration or TSS loading.
+pub mod gdt;
+
 /// CPU exception handling.
 ///
 /// Currently only x86(_64) interrupts are supported, however ARM and RISC-V interrupts will be
 /// implemented in the future as part of platform availability expansion efforts.
 pub mod interrupts;
-
-pub mod logging;
 
 // IMPORTS //
 
