@@ -20,6 +20,9 @@ pub mod error;
 /// TODO: document `external` module.
 pub mod externs;
 
+/// TODO: document `io` module.
+pub mod io;
+
 /// TODO: document `math` module.
 pub mod math;
 
@@ -40,6 +43,9 @@ pub mod pointer;
 /// [`String`][crate::string::String]: A growable UTF-8 string.
 #[cfg(feature = "allocators")]
 pub mod string;
+
+/// Low-level system calls.
+pub mod syscall;
 
 /// Facilities for interacting with standard input/output.
 pub mod terminal;
