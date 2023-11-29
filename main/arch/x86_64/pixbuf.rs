@@ -24,7 +24,7 @@ impl PixelBuffer {
          height,
       };
 
-      return Ok(pixbuf).map_err(|_| "error mapping pixel buffer!");
+      return Ok(pixbuf).map_err(|_: &'static str| "error mapping pixel buffer!");
    }
 }
 
