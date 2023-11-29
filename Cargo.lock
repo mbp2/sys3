@@ -997,6 +997,7 @@ dependencies = [
 name = "trident3-main"
 version = "3.0.1"
 dependencies = [
+ "spin 0.9.8",
  "springboard-api",
  "trident3-base",
  "x86_64",

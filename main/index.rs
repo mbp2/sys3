@@ -18,20 +18,25 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
-   let fb_info = info.framebuffer
-      .as_ref().clone().unwrap().info();
-
-   let framebuffer = info.framebuffer.as_mut().unwrap();
-
    // Initialise the global descriptor table.
    gdt::initGDT();
 
    // Initialise the interrupt descriptor table.
    interrupts::initIDT();
 
-   // Initialise logging facilities.
-   let buffer = framebuffer.buffer_mut();
-   terminal::init_writer(buffer, fb_info, true, false);
+   // Initialise our peripherals.
+   #[cfg(target_arch="aarch64")]
+   arch::aarch::build_peripherals();
+
+   #[cfg(target_arch="x86_64")]
+   arch::x86_64::build_peripherals();
+
+   #[cfg(target_arch="riscv64")]
+   arch::riscv::build_peripherals();
+
+   // Initialise our global writer and logger.
+   terminal::initialise(false);
+   terminal::build_logger(false);
 
    println!("Hello world!");
 

@@ -26,7 +26,7 @@ pub fn get_char_raster(c: char) -> RasterizedChar {
 
 pub struct LockedWriter {
    pub writer: Option<Spinlock<TerminalWriter>>,
-   pub serial: Option<Spinlock<SerialPort>>,
+   pub serial: Option<Spinlock<SerialPort<Pio<u8>>>>,
 }
 
 impl LockedWriter {
@@ -214,7 +214,7 @@ impl Write for TerminalWriter {
 
 use {
    super::font as private,
-   crate::uart::SerialPort,
+   crate::{syscall::pio::Pio, uart::SerialPort},
    conquer_once::spin::OnceCell,
    core::{fmt::{self, Write}, ptr},
    noto_sans_mono_bitmap::{RasterizedChar, get_raster},
