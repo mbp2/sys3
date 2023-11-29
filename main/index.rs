@@ -99,9 +99,8 @@ pub mod interrupts;
 extern crate springboard_api;
 extern crate x86_64;
 
-use springboard_api::config::Mapping;
 use {
    base::terminal,
    core::panic::PanicInfo,
-   springboard_api::{BootInfo, BootloaderConfig}
+   springboard_api::{BootInfo, BootloaderConfig, config::Mapping}
 };
