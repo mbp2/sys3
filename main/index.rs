@@ -61,7 +61,7 @@ extern "C" fn abort() -> ! {
    loop {
       unsafe {
          #[cfg(target_arch="aarch64")]
-         core::arch::asm!();
+         core::arch::asm!("wfi"::::"volatile");
 
          #[cfg(any(target_arch="riscv64", target_arch="riscv32"))]
          core::arch::asm!("wfi"::::"volatile");
