@@ -1,22 +1,22 @@
 /// Basic power-of-2 integer math.
 pub trait PowersOf2 {
-   fn PowerOf2(self) -> bool;
-   fn NextPowerOf2(self) -> usize;
-   fn Log2(self) -> u8;
+   fn powerOf2(self) -> bool;
+   fn nextPowerOf2(self) -> usize;
+   fn log2(self) -> u8;
 }
 
 impl PowersOf2 for usize {
    /// This code is based on
    /// http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
-   fn PowerOf2(self) -> bool {
+   fn powerOf2(self) -> bool {
       self != 0 && (self & (self - 1)) == 0
    }
 
-   /// Caluculate the next power of two.
+   /// Calculate the next power of two.
    ///
    /// Based on
    /// http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-   fn NextPowerOf2(self) -> usize {
+   fn nextPowerOf2(self) -> usize {
       // Pick off this immediately in hopes that the optimizer can see it
       // easily.
       if self == 0 {
@@ -39,7 +39,7 @@ impl PowersOf2 for usize {
       let result = match v {
          Wrapping(v) => v,
       };
-      assert!(result.PowerOf2());
+      assert!(result.powerOf2());
       assert!(result >= self && self > result >> 1);
       result
    }
@@ -51,7 +51,7 @@ impl PowersOf2 for usize {
    ///
    /// Based on the obvious code at
    /// http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
-   fn Log2(self) -> u8 {
+   fn log2(self) -> u8 {
       let mut temp = self;
       let mut result = 0;
       temp >>= 1;

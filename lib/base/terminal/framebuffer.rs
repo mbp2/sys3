@@ -67,6 +67,7 @@ impl LockedWriter {
       if let Some(framebuffer) = &self.writer {
          unsafe { framebuffer.force_unlock() };
       }
+
       if let Some(serial) = &self.serial {
          unsafe { serial.force_unlock() };
       }
@@ -92,6 +93,7 @@ impl log::Log for LockedWriter {
 
    fn flush(&self) {}
 }
+
 /// Allows logging text to a pixel-based framebuffer.
 pub struct TerminalWriter {
    buffer: &'static mut [u8],
@@ -122,17 +124,19 @@ impl TerminalWriter {
       self.xpos = BORDER_PADDING;
    }
 
-   /// Erases all text on the screen. Resets `self.x_pos` and `self.y_pos`.
+   /// Erases all text on the screen. Resets `self.xpos` and `self.ypos`.
    pub fn clear(&mut self) {
       self.xpos = BORDER_PADDING;
       self.ypos = BORDER_PADDING;
       self.buffer.fill(0);
    }
 
+   #[inline]
    pub fn width(&self) -> usize {
       self.info.width
    }
 
+   #[inline]
    pub fn height(&self) -> usize {
       self.info.height
    }
@@ -148,6 +152,7 @@ impl TerminalWriter {
             if new_xpos >= self.width() {
                self.newline();
             }
+
             let new_ypos = self.ypos + CHAR_RASTER_HEIGHT.val() + BORDER_PADDING;
 
             if new_ypos >= self.height() {
@@ -160,7 +165,7 @@ impl TerminalWriter {
    }
 
    /// Prints a rendered char into the framebuffer.
-   /// Updates `self.x_pos`.
+   /// Updates `self.xpos`.
    fn write_rendered_char(&mut self, rendered_char: RasterizedChar) {
       for (y, row) in rendered_char.raster().iter().enumerate() {
          for (x, byte) in row.iter().enumerate() {

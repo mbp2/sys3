@@ -1,7 +1,8 @@
 //! Foundation library for Trident 3
 #![crate_name = "base"]
-#![feature(decl_macro, coerce_unsized, unsize)]
+#![allow(nonstandard_style)]
 #![warn(missing_docs, missing_abi)]
+#![feature(decl_macro, coerce_unsized, unsize)]
 #![no_std]
 
 // MODULES //
