@@ -18,11 +18,6 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
-   let fb_info = info.framebuffer
-      .as_ref().clone().unwrap().info();
-
-   let framebuffer = info.framebuffer.as_mut().unwrap();
-
    // Initialise the global descriptor table.
    gdt::initGDT();
 
@@ -30,10 +25,24 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    interrupts::initIDT();
 
    // Initialise logging facilities.
-   let buffer = framebuffer.buffer_mut();
+   let framebuffer = info.framebuffer.clone();
+   let fb_info = framebuffer.as_ref().unwrap().info();
+   let buffer = framebuffer.into_option().unwrap().into_buffer();
    terminal::init_writer(buffer, fb_info, true, false);
 
-   println!("Hello world!");
+   println!(
+      r#"
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Et malesuada fames ac turpis. Dictum sit amet justo donec enim diam vulputate ut pharetra. Habitant morbi tristique senectus et netus et malesuada fames. Magna fermentum iaculis eu non diam phasellus. Fermentum odio eu feugiat pretium. Aenean et tortor at risus viverra adipiscing at. Id cursus metus aliquam eleifend mi in nulla posuere sollicitudin. Ut ornare lectus sit amet est placerat in egestas. Lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare. Sed vulputate odio ut enim. Sem integer vitae justo eget magna fermentum iaculis. Rutrum quisque non tellus orci ac auctor augue.
+
+      Feugiat vivamus at augue eget arcu dictum varius duis at. Pulvinar sapien et ligula ullamcorper malesuada proin libero. Consectetur libero id faucibus nisl tincidunt eget. Libero id faucibus nisl tincidunt eget nullam. Suspendisse sed nisi lacus sed viverra tellus in. Habitant morbi tristique senectus et netus et malesuada. Faucibus turpis in eu mi bibendum neque egestas congue. Purus in massa tempor nec feugiat nisl pretium fusce. Sit amet luctus venenatis lectus magna fringilla. Ac orci phasellus egestas tellus. Eu augue ut lectus arcu bibendum at varius vel. Amet luctus venenatis lectus magna. Quis vel eros donec ac odio tempor orci dapibus ultrices. Dignissim enim sit amet venenatis urna cursus. Auctor elit sed vulputate mi sit amet mauris.
+
+      Tincidunt arcu non sodales neque. Etiam tempor orci eu lobortis elementum nibh tellus molestie nunc. At elementum eu facilisis sed odio. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non. Auctor urna nunc id cursus metus aliquam. Iaculis at erat pellentesque adipiscing commodo elit. Ultrices gravida dictum fusce ut placerat orci. Bibendum neque egestas congue quisque egestas diam in arcu. Suspendisse in est ante in nibh mauris cursus mattis. Facilisis magna etiam tempor orci eu lobortis elementum. Tempus iaculis urna id volutpat lacus laoreet. Justo nec ultrices dui sapien eget mi proin. Elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Vitae elementum curabitur vitae nunc sed.
+
+      Dis parturient montes nascetur ridiculus mus. Rutrum quisque non tellus orci ac auctor augue. Congue quisque egestas diam in arcu cursus euismod. Leo in vitae turpis massa. Vulputate mi sit amet mauris commodo quis imperdiet massa. In hac habitasse platea dictumst quisque sagittis purus sit. Ut ornare lectus sit amet est placerat. Iaculis urna id volutpat lacus laoreet. Ac turpis egestas sed tempus urna et pharetra pharetra massa. Nibh tellus molestie nunc non blandit massa.
+
+      Sagittis orci a scelerisque purus semper. Nulla pellentesque dignissim enim sit. Elementum curabitur vitae nunc sed velit dignissim sodales ut eu. Sagittis id consectetur purus ut faucibus pulvinar elementum integer enim. Mi ipsum faucibus vitae aliquet nec. Ac tincidunt vitae semper quis lectus nulla at volutpat diam. Lectus vestibulum mattis ullamcorper velit sed. Nisi est sit amet facilisis magna etiam tempor orci. In cursus turpis massa tincidunt dui. Auctor neque vitae tempus quam pellentesque nec nam. Duis at consectetur lorem donec massa sapien.
+      "#
+   );
 
    loop {}
 }
@@ -75,7 +84,7 @@ extern "C" fn abort() -> ! {
 #[no_mangle]
 extern "C" fn eh_personality() {}
 
-springboard_api::entry_point!(Main, config = &BOOTLOADER_CONFIG);
+springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 

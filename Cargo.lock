@@ -870,7 +870,7 @@ dependencies = [
 [[package]]
 name = "springboard"
 version = "3.0.1"
-source = "git+https://github.com/azyklus/springboard#f39bd5b07f4c45a9773810d0380321e134d1ede7"
+source = "git+https://github.com/kell-dev/springboard#b9aeb78acafb6323c3c3cffe6269eb204c977390"
 dependencies = [
  "anyhow",
  "async-process",
@@ -888,12 +888,12 @@ dependencies = [
 [[package]]
 name = "springboard-api"
 version = "3.0.1"
-source = "git+https://github.com/azyklus/springboard#f39bd5b07f4c45a9773810d0380321e134d1ede7"
+source = "git+https://github.com/kell-dev/springboard#b9aeb78acafb6323c3c3cffe6269eb204c977390"
 
 [[package]]
 name = "springboard-boot-config"
 version = "3.0.1"
-source = "git+https://github.com/azyklus/springboard#f39bd5b07f4c45a9773810d0380321e134d1ede7"
+source = "git+https://github.com/kell-dev/springboard#b9aeb78acafb6323c3c3cffe6269eb204c977390"
 dependencies = [
  "serde",
 ]
