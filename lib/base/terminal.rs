@@ -41,12 +41,12 @@ macro_rules! print {
 
       if let Some(writer) = &crate::terminal::framebuffer::GLOBAL_WRITER.get().unwrap().writer {
          let mut writer = writer.lock();
-         let _ = write!(writer, $($args)+);
+         let _ = write!(writer, $($args)+).unwrap();
       }
 
       if let Some(serial) = &crate::terminal::framebuffer::GLOBAL_WRITER.get().unwrap().serial {
          let mut serial = serial.lock();
-         let _ = write!(serial, $($args)+);
+         let _ = write!(serial, $($args)+).unwrap();
       }
    });
 }
@@ -84,7 +84,6 @@ pub fn _print(args: fmt::Arguments) {
 // MODULES //
 
 /// Font-related constants.
-
 pub mod font;
 
 /// A framebuffer-based writer implementation.
