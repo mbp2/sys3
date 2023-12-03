@@ -91,7 +91,7 @@ impl<'a> Heap<'a> {
 
       // The heap size must be a power of 2.  See:
       // http://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
-      assert!(heapSize.PowerOf2());
+      assert!(heapSize.powerOf2());
 
       // We must have one free array per possible heap block size.
       assert_eq!(
@@ -110,7 +110,7 @@ impl<'a> Heap<'a> {
          heapSize,
          freeLists,
          minBlockSize,
-         minBlockSizeLog2: minBlockSize.Log2(),
+         minBlockSizeLog2: minBlockSize.log2(),
       };
 
       // Insert the entire heap onto the appropriate free array as a
@@ -132,7 +132,7 @@ impl<'a> Heap<'a> {
    /// did when allocating it, or everything will break horribly.
    pub fn allocationSize(&self, mut size: usize, align: usize) -> Option<usize> {
       // Sorry, we don't support weird alignments.
-      if !align.PowerOf2() {
+      if !align.powerOf2() {
          return None;
       }
 
@@ -153,7 +153,7 @@ impl<'a> Heap<'a> {
       size = max(size, self.minBlockSize);
 
       // Round up to the next power of two.
-      size = size.NextPowerOf2();
+      size = size.nextPowerOf2();
 
       // We can't allocate a block bigger than our heap.
       if size > self.heapSize {
@@ -169,7 +169,7 @@ impl<'a> Heap<'a> {
    pub fn allocationOrder(&self, size: usize, align: usize) -> Option<usize> {
       self
          .allocationSize(size, align)
-         .map(|s| (s.Log2() - self.minBlockSizeLog2) as usize)
+         .map(|s| (s.log2() - self.minBlockSizeLog2) as usize)
    }
 
    /// The size of the blocks we allocate for a given order.
