@@ -1,8 +1,10 @@
 #![allow(nonstandard_style)]
 #![feature(
-   abi_x86_interrupt,
-   const_mut_refs,
-   panic_info_message,
+abi_x86_interrupt,
+allocator_api,
+alloc_error_handler,
+const_mut_refs,
+panic_info_message,
 )]
 #![no_main]
 #![no_std]
@@ -15,6 +17,9 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
    config.mappings.page_table_recursive = Some(Mapping::Dynamic);
    config
 };
+
+pub const HEAP_START: usize = 0x4444_4444_0000;
+pub const HEAP_SIZE: usize = 100 * 1024;
 
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
@@ -69,13 +74,13 @@ fn panic(info: &PanicInfo) -> ! {
 extern "C" fn abort() -> ! {
    loop {
       unsafe {
-         #[cfg(target_arch="aarch64")]
+         #[cfg(target_arch = "aarch64")]
          core::arch::asm!("wfi"::::"volatile");
 
-         #[cfg(any(target_arch="riscv64", target_arch="riscv32"))]
+         #[cfg(target_arch = "riscv64")]
          core::arch::asm!("wfi"::::"volatile");
 
-         #[cfg(any(target_arch="x86", target_arch="x86_64"))]
+         #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
          core::arch::asm!("hlt");
       }
    }
@@ -102,14 +107,21 @@ pub mod gdt;
 /// implemented in the future as part of platform availability expansion efforts.
 pub mod interrupts;
 
+/// Kernel memory management.
+pub mod memory;
+
 // IMPORTS //
 
+//extern crate alloc;
 #[macro_use] extern crate base;
 extern crate springboard_api;
 extern crate x86_64;
 
 use {
-   base::terminal,
+   base::{
+      alloc::heap,
+      terminal,
+   },
    core::panic::PanicInfo,
-   springboard_api::{BootInfo, BootloaderConfig, config::Mapping}
+   springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
 };
