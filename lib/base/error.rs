@@ -1,4 +1,4 @@
-pub type Result = core::result::Result<(), Box<dyn BaseError>>;
+pub type Result<T> = core::result::Result<T, Box<dyn BaseError>>;
 
 pub trait BaseError: Debug + Display {
    /// The lower-level source of error, if any.
