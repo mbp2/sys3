@@ -45,8 +45,11 @@ pub mod pointer;
 #[cfg(feature = "allocators")]
 pub mod string;
 
-/// Low-level system calls.
+/// Facilities for handling low-level system calls.
 pub mod syscall;
+
+/// Coroutine handling facilities, i.e. `async`/`.await` and task runners.
+pub mod tasks;
 
 /// Facilities for interacting with standard input/output.
 pub mod terminal;
@@ -68,11 +71,17 @@ extern crate bitflags;
 extern crate cfg_if;
 extern crate conquer_once;
 extern crate core;
+extern crate crossbeam_queue;
 extern crate lazy_static;
+extern crate noto_sans_mono_bitmap;
 extern crate rustversion;
 extern crate spin;
 extern crate spinning_top;
 extern crate springboard_api;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+extern crate x86;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+extern crate x86_64;
 
 // EXPORTS //
 
