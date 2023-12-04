@@ -25,6 +25,7 @@ members = [
    "main",
    "bin/ffsh",
    "lib/base",
+   "lib/test",
 ]
 
 [workspace.package]

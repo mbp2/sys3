@@ -18,38 +18,36 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
    config
 };
 
-pub const HEAP_START: usize = 0x4444_4444_0000;
-pub const HEAP_SIZE: usize = 100 * 1024;
-
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
-   // Initialise the global descriptor table.
-   gdt::initGDT();
-
-   // Initialise the interrupt descriptor table.
-   interrupts::initIDT();
-
    // Initialise logging facilities.
    let framebuffer = info.framebuffer.clone();
    let fb_info = framebuffer.as_ref().unwrap().info();
    let buffer = framebuffer.into_option().unwrap().into_buffer();
    terminal::init_writer(buffer, fb_info, true, false);
 
-   println!(
-      r#"
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Et malesuada fames ac turpis. Dictum sit amet justo donec enim diam vulputate ut pharetra. Habitant morbi tristique senectus et netus et malesuada fames. Magna fermentum iaculis eu non diam phasellus. Fermentum odio eu feugiat pretium. Aenean et tortor at risus viverra adipiscing at. Id cursus metus aliquam eleifend mi in nulla posuere sollicitudin. Ut ornare lectus sit amet est placerat in egestas. Lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare. Sed vulputate odio ut enim. Sem integer vitae justo eget magna fermentum iaculis. Rutrum quisque non tellus orci ac auctor augue.
+   // Initialise the global descriptor table.
+   log::info!("Initialising global descriptor table!");
+   gdt::initGDT();
 
-      Feugiat vivamus at augue eget arcu dictum varius duis at. Pulvinar sapien et ligula ullamcorper malesuada proin libero. Consectetur libero id faucibus nisl tincidunt eget. Libero id faucibus nisl tincidunt eget nullam. Suspendisse sed nisi lacus sed viverra tellus in. Habitant morbi tristique senectus et netus et malesuada. Faucibus turpis in eu mi bibendum neque egestas congue. Purus in massa tempor nec feugiat nisl pretium fusce. Sit amet luctus venenatis lectus magna fringilla. Ac orci phasellus egestas tellus. Eu augue ut lectus arcu bibendum at varius vel. Amet luctus venenatis lectus magna. Quis vel eros donec ac odio tempor orci dapibus ultrices. Dignissim enim sit amet venenatis urna cursus. Auctor elit sed vulputate mi sit amet mauris.
+   // Initialise the interrupt descriptor table.
+   log::info!("Initialising interrupt descriptor table!");
+   interrupts::initIDT();
 
-      Tincidunt arcu non sodales neque. Etiam tempor orci eu lobortis elementum nibh tellus molestie nunc. At elementum eu facilisis sed odio. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non. Auctor urna nunc id cursus metus aliquam. Iaculis at erat pellentesque adipiscing commodo elit. Ultrices gravida dictum fusce ut placerat orci. Bibendum neque egestas congue quisque egestas diam in arcu. Suspendisse in est ante in nibh mauris cursus mattis. Facilisis magna etiam tempor orci eu lobortis elementum. Tempus iaculis urna id volutpat lacus laoreet. Justo nec ultrices dui sapien eget mi proin. Elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Vitae elementum curabitur vitae nunc sed.
+   // Set up our page tables.
+   let physical_offset = info.physical_memory_offset.clone();
+   let physical_offset = VirtAddr::new(physical_offset.into_option().unwrap());
+   let mut mapper = unsafe{ memory::initialise(physical_offset) };
+   let mut frame_allocator = unsafe{
+      SystemFrameAllocator::new(info.memory_regions.as_ref())
+   };
 
-      Dis parturient montes nascetur ridiculus mus. Rutrum quisque non tellus orci ac auctor augue. Congue quisque egestas diam in arcu cursus euismod. Leo in vitae turpis massa. Vulputate mi sit amet mauris commodo quis imperdiet massa. In hac habitasse platea dictumst quisque sagittis purus sit. Ut ornare lectus sit amet est placerat. Iaculis urna id volutpat lacus laoreet. Ac turpis egestas sed tempus urna et pharetra pharetra massa. Nibh tellus molestie nunc non blandit massa.
+   log::info!("Building the heap!");
+   memory::build_heap(&mut mapper, &mut frame_allocator)
+      .expect("failed to initialise heap");
 
-      Sagittis orci a scelerisque purus semper. Nulla pellentesque dignissim enim sit. Elementum curabitur vitae nunc sed velit dignissim sodales ut eu. Sagittis id consectetur purus ut faucibus pulvinar elementum integer enim. Mi ipsum faucibus vitae aliquet nec. Ac tincidunt vitae semper quis lectus nulla at volutpat diam. Lectus vestibulum mattis ullamcorper velit sed. Nisi est sit amet facilisis magna etiam tempor orci. In cursus turpis massa tincidunt dui. Auctor neque vitae tempus quam pellentesque nec nam. Duis at consectetur lorem donec massa sapien.
-      "#
-   );
-
-   loop {}
+   println!("End of the line!");
+   hlt_loop();
 }
 
 /// This function is called on compiler or runtime panic.
@@ -89,6 +87,12 @@ extern "C" fn abort() -> ! {
 #[no_mangle]
 extern "C" fn eh_personality() {}
 
+pub fn hlt_loop() -> ! {
+   loop{
+      x86_64::instructions::hlt();
+   }
+}
+
 springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
@@ -118,10 +122,15 @@ extern crate springboard_api;
 extern crate x86_64;
 
 use {
+   crate::memory::SystemFrameAllocator,
    base::{
       alloc::heap,
+      log,
       terminal,
    },
    core::panic::PanicInfo,
    springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
+   x86_64::{
+      VirtAddr,
+   },
 };
