@@ -1,27 +1,36 @@
-#[doc(hidden)]
+#[global_allocator]
+pub static GLOBAL: GlobalAllocator = GlobalAllocator;
+
+/// Allocates a chunk of memory.
 #[no_mangle]
 pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
+   let layout = Layout::from_size_align(size, align);
    unsafe {
       HEAP
          .lock()
          .as_mut()
-         .expect("must initialise heap before calling")
-         .allocate(size, align)
+         .expect("must first initialise heap before allocating memory")
+         .allocate(layout)
+         .unwrap()
+         .as_ptr()
    }
 }
 
-#[doc(hidden)]
+/// Frees a chunk of memory.
 #[no_mangle]
 pub extern "C" fn __rust_deallocate(pointer: *mut u8, oldSize: usize, align: usize) {
+   let layout = Layout::from_size_align(oldSize, align);
    unsafe {
       HEAP
          .lock()
          .as_mut()
-         .expect("must initialise heap before calling")
-         .deallocate(pointer, oldSize, align)
+         .expect("must first initialise heap before attempting to deallocate memory")
+         .deallocate(NonNull::new_unchecked(pointer), layout);
    }
 }
 
+/// Reallocates a chunk of memory.
+#[no_mangle]
 pub extern "C" fn __rust_reallocate(
    pointer: *mut u8,
    oldSize: usize,
@@ -60,13 +69,33 @@ pub extern "C" fn __rust_usable_size(size: usize, _align: usize) -> usize {
    size
 }
 
-#[doc(hidden)]
-pub unsafe fn alloc_one<T>(allocator: &mut dyn Allocator) -> Option<NonNull<T>> {
+/// Performs a single heap allocation, like `malloc`.
+/// Uses the size and align of `T` for the memory layout.
+///
+/// ## Arguments
+///
+/// * `allocator` - [Allocator](crate::alloc::Allocator) trait implementation.
+///
+/// ## Safety
+///
+/// Unsafe because of a call to [`allocate_aligned`](crate::alloc::Allocator::allocate_aligned),
+/// where the call is inherently unsafe because we aren't certain the allocation will succeed.
+pub unsafe fn allocate<T>(allocator: &mut dyn Allocator) -> Option<NonNull<T>> {
    allocator.allocate_aligned(Layout::new::<T>()).map(|ptr| ptr.cast::<T>())
 }
 
-#[doc(hidden)]
-pub unsafe fn alloc_array<T>(allocator: &mut dyn Allocator, size: usize) -> Option<NonNull<T>> {
+/// Allocates an array of size `size`.
+///
+/// ## Arguments
+///
+/// * `allocator` - [Allocator](crate::alloc::Allocator) trait implementation.
+/// * `size` - A [`usize`](prim@usize) providing the size of the array to be allocated.
+///
+/// ## Safety
+///
+/// Unsafe because of a call to [`allocate_aligned`](crate::alloc::Allocator::allocate_aligned),
+/// where the call is inherently unsafe because we aren't certain the allocation will succeed.
+pub unsafe fn allocate_array<T>(allocator: &mut dyn Allocator, size: usize) -> Option<NonNull<T>> {
    allocator
       .allocate_aligned(Layout::from_type_array::<T>(size))
       .map(|ptr| ptr.cast::<T>())
@@ -220,6 +249,20 @@ unsafe impl Allocator for GlobalAllocator {
    }
 }
 
+unsafe impl GlobalAlloc for GlobalAllocator {
+   unsafe fn alloc(&self, layout: StdLayout) -> *mut u8 {
+      let layout = Layout::from(layout);
+
+      self.allocate(layout)
+         .map_or(0 as *mut u8, |allocation| allocation.as_ptr())
+   }
+
+   unsafe fn dealloc(&self, ptr: *mut u8, layout: StdLayout) {
+      let layout = Layout::from(layout);
+      self.deallocate(ptr, layout);
+   }
+}
+
 // MODULES //
 
 /// A simple heap based on a buddy allocator.  For the theory of buddy
@@ -253,6 +296,7 @@ pub use self::layout::Layout;
 
 use {
    self::heap::HEAP,
+   std_alloc::alloc::{GlobalAlloc, Layout as StdLayout},
    core::{
       cell::RefCell,
       cmp::min,

@@ -254,7 +254,7 @@ impl<T, A: Allocator> RawArray<T, A> {
       }
 
       let mut pointer = unsafe {
-         alloc_array::<T>(&mut self.allocator, new_capacity)
+         allocate_array::<T>(&mut self.allocator, new_capacity)
             .expect("Allocation error")
       };
 
@@ -564,10 +564,19 @@ impl_stack_array!(32, SmallArray32);
 impl_stack_array!(64, SmallArray64);
 impl_stack_array!(128, SmallArray128);
 
+// MODULES //
+
+/// Provides an intrusive linked list.
+pub mod linked_list;
+
+// EXPORTS //
+
+pub use self::linked_list::LinkedList;
+
 // IMPORTS //
 
 use {
-   crate::alloc::{alloc_array, Allocator, GlobalAllocator, Layout},
+   crate::alloc::{allocate_array, Allocator, GlobalAllocator, Layout},
    core::{
       borrow::Borrow,
       iter::{FromIterator, IntoIterator},

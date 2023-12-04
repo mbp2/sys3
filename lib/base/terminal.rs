@@ -2,34 +2,16 @@
 pub fn init_writer(
    buffer: &'static mut [u8],
    info: FrameBufferInfo,
-   buffer_log_status: bool,
-   serial_log_status: bool,
+   with_framebuffer: bool,
+   with_serial: bool,
 ) {
    let writer = FB_WRITER.get_or_init(move || {
-      LockedWriter::new(buffer, info, buffer_log_status, serial_log_status)
-   });
-
-   writer.writer.as_ref().unwrap()
-      .lock()
-      .write_str("Writer initialised!")
-      .unwrap();
-}
-
-/// Initialise a text-based logger using the framebuffer set up by the bootloader.
-pub fn init_logger(
-   buffer: &'static mut [u8],
-   info: FrameBufferInfo,
-   log_level: LevelFilter,
-   writer_log_status: bool,
-   serial_log_status: bool,
-) {
-   let writer = FB_WRITER.get_or_init(move || {
-      LockedWriter::new(buffer, info, writer_log_status, serial_log_status)
+      LockedWriter::new(buffer, info, with_framebuffer, with_serial)
    });
 
    log::set_logger(writer).expect("logger already exists");
-   log::set_max_level(log_level);
-   log::info!("Logger initialised: {:?}", info);
+   log::set_max_level(LevelFilter::Info);
+   log::info!("Global writer/logger successfully initialised: {:?}", info);
 }
 
 // MACROS //
@@ -39,12 +21,12 @@ macro_rules! print {
    ($($args:tt)+) => ({
       use core::fmt::Write;
 
-      if let Some(writer) = &crate::terminal::framebuffer::GLOBAL_WRITER.get().unwrap().writer {
+      if let Some(writer) = &$crate::terminal::framebuffer::GLOBAL_WRITER.get().unwrap().writer {
          let mut writer = writer.lock();
          let _ = write!(writer, $($args)+).unwrap();
       }
 
-      if let Some(serial) = &crate::terminal::framebuffer::GLOBAL_WRITER.get().unwrap().serial {
+      if let Some(serial) = &$crate::terminal::framebuffer::GLOBAL_WRITER.get().unwrap().serial {
          let mut serial = serial.lock();
          let _ = write!(serial, $($args)+).unwrap();
       }

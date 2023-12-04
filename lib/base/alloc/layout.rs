@@ -23,6 +23,11 @@ impl Layout {
       return Layout { size, align: 4 };
    }
 
+   #[inline]
+   pub fn from_size_align(size: usize, align: usize) -> Self {
+      return Layout{ size, align };
+   }
+
    /// Create a new instance of Layout from the given array-length and type parameter.
    #[inline]
    pub fn from_type_array<T>(length: usize) -> Self {
@@ -40,6 +45,18 @@ impl Layout {
    }
 }
 
+impl Into<StdLayout> for Layout {
+   fn into(self) -> StdLayout {
+      return StdLayout::from_size_align(self.size, self.align).unwrap();
+   }
+}
+
+impl From<StdLayout> for Layout {
+   fn from(value: StdLayout) -> Self {
+      return Layout::from_size(value.size());
+   }
+}
+
 #[derive(Debug)]
 pub struct LayoutError;
 
@@ -51,7 +68,10 @@ impl Display for LayoutError {
 
 // IMPORTS //
 
-use core::{
-   fmt::{self, Display},
-   mem::{align_of, size_of},
+use {
+   std_alloc::alloc::Layout as StdLayout,
+   core::{
+      fmt::{self, Display},
+      mem::{align_of, size_of},
+   },
 };

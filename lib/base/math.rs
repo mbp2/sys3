@@ -1,3 +1,7 @@
+pub fn previous_po2(number: usize) -> usize {
+   return 1 << (usize::BITS as usize - number.leading_zeros() as usize - 1);
+}
+
 /// Basic power-of-2 integer math.
 pub trait PowersOf2 {
    fn powerOf2(self) -> bool;

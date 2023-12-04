@@ -18,7 +18,7 @@ impl<T, A: Allocator> Unique<T, A> {
    pub fn new_with(value: T, mut allocator: A) -> Self {
       let mut pointer =
          unsafe {
-            alloc_one::<T>(&mut allocator)
+            allocate::<T>(&mut allocator)
                .expect("allocation failure")
                .cast::<T>()
          };
@@ -139,7 +139,7 @@ impl<T: ?Sized, A: Allocator> Unpin for Unique<T, A> {}
 // IMPORTS //
 
 use {
-   crate::alloc::{alloc_one, Allocator, GlobalAllocator, Layout},
+   crate::alloc::{allocate, Allocator, GlobalAllocator, Layout},
    core::{
       borrow::{Borrow, BorrowMut},
       convert::{AsMut, AsRef},

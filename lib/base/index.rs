@@ -1,4 +1,4 @@
-//! Foundation library for Trident 3
+//! Foundation runtime library for Trident 3
 #![crate_name = "base"]
 #![allow(nonstandard_style)]
 #![warn(missing_docs, missing_abi)]
@@ -63,15 +63,18 @@ pub mod uart;
 
 // IMPORTS //
 
-#[cfg(any(feature="std-allocators", not(feature="allocators")))]
 extern crate alloc as std_alloc;
 extern crate bitflags;
 extern crate cfg_if;
 extern crate conquer_once;
 extern crate core;
 extern crate lazy_static;
-extern crate log;
 extern crate rustversion;
 extern crate spin;
 extern crate spinning_top;
 extern crate springboard_api;
+
+// EXPORTS //
+
+/// Export the [`log`](https://docs.rs/log/latest/log) crate to enable consistent logging without additional dependencies.
+pub extern crate log;
