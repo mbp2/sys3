@@ -3,6 +3,7 @@
 abi_x86_interrupt,
 allocator_api,
 alloc_error_handler,
+async_closure,
 const_mut_refs,
 panic_info_message,
 )]
@@ -46,8 +47,17 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    memory::build_heap(&mut mapper, &mut frame_allocator)
       .expect("failed to initialise heap");
 
-   println!("End of the line!");
-   hlt_loop();
+   async fn async_number() -> usize { 42 }
+
+   let example = async || {
+      let number = async_number().await;
+      println!("async number: {}", number);
+   };
+
+   let mut executor = Executor::new();
+   executor.spawn(Task::new(example()));
+   executor.spawn(Task::new(keyboard::print_keypresses()));
+   executor.run();
 }
 
 /// This function is called on compiler or runtime panic.
@@ -116,7 +126,7 @@ pub mod memory;
 
 // IMPORTS //
 
-//extern crate alloc;
+extern crate alloc;
 #[macro_use] extern crate base;
 extern crate springboard_api;
 extern crate x86_64;
@@ -126,6 +136,7 @@ use {
    base::{
       alloc::heap,
       log,
+      tasks::{executor::Executor, Task, keyboard},
       terminal,
    },
    core::panic::PanicInfo,
