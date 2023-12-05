@@ -41,6 +41,9 @@ pub mod optional;
 /// [`Arc`][alloc::sync::Arc].
 pub mod pointer;
 
+/// System process tracking.
+pub mod process;
+
 /// [`String`][crate::string::String]: A growable UTF-8 string.
 #[cfg(feature = "allocators")]
 pub mod string;
