@@ -1,6 +1,6 @@
 pub static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
 
-pub fn initIDT() {
+pub fn initialise() {
    unsafe {
       IDT.breakpoint.set_handler_fn(breakpoint);
       IDT.double_fault.set_handler_fn(double_fault);
@@ -32,7 +32,9 @@ extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, code: PageFault
 
 // IMPORTS //
 
-use x86_64::structures::idt::{
-   InterruptDescriptorTable, InterruptStackFrame,
-   PageFaultErrorCode,
+use {
+   x86_64::structures::idt::{
+      InterruptDescriptorTable, InterruptStackFrame,
+      PageFaultErrorCode,
+   }
 };

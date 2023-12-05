@@ -11,6 +11,7 @@ name = "t3_main"
 path = "index.rs"
 
 [dependencies]
+acpi = "5.0.0"
 springboard-api.workspace = true
 trident3-base.workspace = true
 x86_64 = "0.14.11"

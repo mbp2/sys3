@@ -33,7 +33,7 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
    // Initialise the interrupt descriptor table.
    log::info!("Initialising interrupt descriptor table!");
-   interrupts::initIDT();
+   interrupts::initialise();
 
    // Set up our page tables.
    let physical_offset = info.physical_memory_offset.clone();
@@ -46,6 +46,9 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    log::info!("Building the heap!");
    memory::build_heap(&mut mapper, &mut frame_allocator)
       .expect("failed to initialise heap");
+
+   // Call the runtime init process, call primary shell.
+   process::initialise();
 
    async fn async_number() -> usize { 42 }
 
@@ -107,6 +110,11 @@ springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 
+/// Advanced Programmable Interrupt Controller (APIC) implementation.
+///
+/// Includes CPU APIC and IO APIC implementations.
+pub mod apic;
+
 /// Architecture-specific code.
 pub mod arch;
 
@@ -119,14 +127,20 @@ pub mod gdt;
 ///
 /// Currently only x86(_64) interrupts are supported, however ARM and RISC-V interrupts will be
 /// implemented in the future as part of platform availability expansion efforts.
+///
+/// Includes APIC initialisation as well!
 pub mod interrupts;
 
 /// Kernel memory management.
 pub mod memory;
 
+/// Kernel-level process management.
+pub mod process;
+
 // IMPORTS //
 
 extern crate alloc;
+extern crate acpi;
 #[macro_use] extern crate base;
 extern crate springboard_api;
 extern crate x86_64;
@@ -134,9 +148,11 @@ extern crate x86_64;
 use {
    crate::memory::SystemFrameAllocator,
    base::{
-      alloc::heap,
       log,
-      tasks::{executor::Executor, Task, keyboard},
+      tasks::{
+         executor::Executor,
+         Task, keyboard
+      },
       terminal,
    },
    core::panic::PanicInfo,
