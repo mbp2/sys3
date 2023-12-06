@@ -343,11 +343,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ff-shell"
-version = "0.1.0"
-dependencies = [
- "trident3-base",
-]
+name = "ffsh"
+version = "3.0.1"
 
 [[package]]
 name = "funty"
