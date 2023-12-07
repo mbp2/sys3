@@ -32,6 +32,7 @@ members = [
 description = "An experimental operating system, for science!"
 documentation = "https://mbp2.blog/src/@trident"
 edition = "2021"
+license = "Apache-2.0"
 repository = "https://github.com/kell-dev/sys3"
 version = "3.0.1" # Don't forget to update workspace.dependencies when updating the version field
 
@@ -39,7 +40,7 @@ version = "3.0.1" # Don't forget to update workspace.dependencies when updating 
 anyhow = "1.0.75"
 spin = { version = "0.9.8", features=["spin_mutex"] }
 spinning_top = "0.3.0"
-springboard-api = { git = "https://github.com/kell-dev/springboard" }
+springboard-api = { git = "https://github.com/kell-dev/springboard", version = "3.0.1" }
 trident3-base = { path = "./lib/base", version = "3.0.1", features = ["allocators"] }
 
 [profile.dev]

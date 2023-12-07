@@ -4,6 +4,7 @@ abi_x86_interrupt,
 allocator_api,
 alloc_error_handler,
 async_closure,
+cfg_match,
 const_mut_refs,
 panic_info_message,
 )]
@@ -47,20 +48,10 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    memory::build_heap(&mut mapper, &mut frame_allocator)
       .expect("failed to initialise heap");
 
-   // Call the runtime init process, call primary shell.
-   process::initialise();
+   #[cfg(target_arch = "x86_64")]
+   arch::x86_64::initialise_platform();
 
-   async fn async_number() -> usize { 42 }
-
-   let example = async || {
-      let number = async_number().await;
-      println!("async number: {}", number);
-   };
-
-   let mut executor = Executor::new();
-   executor.spawn(Task::new(example()));
-   executor.spawn(Task::new(keyboard::print_keypresses()));
-   executor.run();
+   hlt_loop();
 }
 
 /// This function is called on compiler or runtime panic.
@@ -110,11 +101,6 @@ springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 
-/// Advanced Programmable Interrupt Controller (APIC) implementation.
-///
-/// Includes CPU APIC and IO APIC implementations.
-pub mod apic;
-
 /// Architecture-specific code.
 pub mod arch;
 
@@ -128,7 +114,7 @@ pub mod gdt;
 /// Currently only x86(_64) interrupts are supported, however ARM and RISC-V interrupts will be
 /// implemented in the future as part of platform availability expansion efforts.
 ///
-/// Includes APIC initialisation as well!
+/// Optionally this module includes APIC initialisation.
 pub mod interrupts;
 
 /// Kernel memory management.
@@ -146,18 +132,11 @@ extern crate springboard_api;
 extern crate x86_64;
 
 use {
-   crate::memory::SystemFrameAllocator,
-   base::{
-      log,
-      tasks::{
-         executor::Executor,
-         Task, keyboard
-      },
-      terminal,
+   crate::{
+      memory::SystemFrameAllocator
    },
+   base::{log, terminal},
    core::panic::PanicInfo,
    springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
-   x86_64::{
-      VirtAddr,
-   },
+   x86_64::{VirtAddr},
 };

@@ -2,6 +2,7 @@
 build="build.rs"
 description = "Foundation runtime library for Trident 3"
 edition.workspace = true
+license.workspace = true
 name = "trident3-base"
 readme = "../../readme.md"
 version.workspace = true
