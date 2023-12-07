@@ -1,8 +1,5 @@
 // WRITER IMPL //
 
-/// The global writer implementation.
-pub static GLOBAL_WRITER: OnceCell<LockedWriter> = OnceCell::uninit();
-
 /// Additional vertical space between lines
 const LINE_SPACING: usize = 2;
 
@@ -25,75 +22,6 @@ pub fn get_char_raster(c: char) -> RasterizedChar {
    get(c).unwrap_or_else(|| get(BACKUP_CHAR).expect("should get raster of backup char"))
 }
 
-pub struct LockedWriter {
-   pub writer: Option<Spinlock<TerminalWriter>>,
-   pub serial: Option<Spinlock<SerialPort>>,
-}
-
-impl LockedWriter {
-   pub fn new(
-      buffer: &'static mut [u8],
-      info: FrameBufferInfo,
-      writer_log_status: bool,
-      serial_log_status: bool,
-   ) -> Self {
-      let port = unsafe {
-         let mut serial = SerialPort::new(0x3F8);
-         serial.init();
-         serial
-      };
-
-      let writer = match writer_log_status {
-         true => Some(Spinlock::new(TerminalWriter::new(buffer, info))),
-         false => None,
-      };
-
-      let serial = match serial_log_status {
-         true => Some(Spinlock::new(port)),
-         false => None,
-      };
-
-      return LockedWriter {
-         writer,
-         serial,
-      };
-   }
-
-   /// Force-unlocks the logger to prevent a deadlock.
-   ///
-   /// ## Safety
-   /// This method is not memory safe and should be only used when absolutely necessary.
-   pub unsafe fn force_unlock(&self) {
-      if let Some(framebuffer) = &self.writer {
-         unsafe { framebuffer.force_unlock() };
-      }
-
-      if let Some(serial) = &self.serial {
-         unsafe { serial.force_unlock() };
-      }
-   }
-}
-
-impl log::Log for LockedWriter {
-   fn enabled(&self, _metadata: &log::Metadata) -> bool {
-      true
-   }
-
-   fn log(&self, record: &log::Record) {
-      if let Some(writer) = &self.writer {
-         let mut writer = writer.lock();
-         writeln!(writer, "{:5}: {}", record.level(), record.args()).unwrap();
-      }
-
-      if let Some(serial) = &self.serial {
-         let mut serial = serial.lock();
-         writeln!(serial, "{:5}: {}", record.level(), record.args()).unwrap();
-      }
-   }
-
-   fn flush(&self) {}
-}
-
 /// Allows logging text to a pixel-based framebuffer.
 pub struct TerminalWriter {
    buffer: &'static mut [u8],
@@ -112,15 +40,15 @@ impl TerminalWriter {
          ypos: 0,
       };
       logger.clear();
-      logger
+      return logger;
    }
 
-   fn newline(&mut self) {
+   pub fn newline(&mut self) {
       self.ypos += CHAR_RASTER_HEIGHT.val() + LINE_SPACING;
       self.carriage_return()
    }
 
-   fn carriage_return(&mut self) {
+   pub fn carriage_return(&mut self) {
       self.xpos = BORDER_PADDING;
    }
 
@@ -143,7 +71,7 @@ impl TerminalWriter {
 
    /// Writes a single char to the framebuffer. Takes care of special control characters, such as
    /// newlines and carriage returns.
-   fn write_char(&mut self, c: char) {
+   pub fn write_char(&mut self, c: char) {
       match c {
          '\n' => self.newline(),
          '\r' => self.carriage_return(),
@@ -166,7 +94,7 @@ impl TerminalWriter {
 
    /// Prints a rendered char into the framebuffer.
    /// Updates `self.xpos`.
-   fn write_rendered_char(&mut self, rendered_char: RasterizedChar) {
+   pub fn write_rendered_char(&mut self, rendered_char: RasterizedChar) {
       for (y, row) in rendered_char.raster().iter().enumerate() {
          for (x, byte) in row.iter().enumerate() {
             self.write_pixel(self.xpos + x, self.ypos + y, *byte);
@@ -175,7 +103,7 @@ impl TerminalWriter {
       self.xpos += rendered_char.width() + LETTER_SPACING;
    }
 
-   fn write_pixel(&mut self, x: usize, y: usize, intensity: u8) {
+   pub fn write_pixel(&mut self, x: usize, y: usize, intensity: u8) {
       let pixel_offset = y * self.info.stride + x;
       let color = match self.info.pixel_format {
          PixelFormat::Rgb => [intensity, intensity, intensity / 2, 0],
@@ -199,7 +127,7 @@ impl TerminalWriter {
 unsafe impl Send for TerminalWriter {}
 unsafe impl Sync for TerminalWriter {}
 
-impl fmt::Write for TerminalWriter {
+impl Write for TerminalWriter {
    fn write_str(&mut self, s: &str) -> fmt::Result {
       for c in s.chars() {
          self.write_char(c);
@@ -207,6 +135,7 @@ impl fmt::Write for TerminalWriter {
       Ok(())
    }
 }
+
 // IMPORTS //
 
 use {
