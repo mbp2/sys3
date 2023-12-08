@@ -51,6 +51,17 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    #[cfg(target_arch = "x86_64")]
    arch::x86_64::initialise_platform();
 
+   async fn example(number: u32) -> u32 {
+      number + 1
+   }
+
+   tasks::add_future(async{
+      let number = example(4).await;
+      println!("{}", number);
+   });
+
+   tasks::run_tasks(); // works now! :D
+
    hlt_loop();
 }
 
@@ -135,7 +146,7 @@ use {
    crate::{
       memory::SystemFrameAllocator
    },
-   base::{log, terminal},
+   base::{log, tasks, terminal},
    core::panic::PanicInfo,
    springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
    x86_64::{VirtAddr},
