@@ -30,7 +30,7 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
    // Initialise the global descriptor table.
    log::info!("Initialising global descriptor table!");
-   gdt::initGDT();
+   gdt::initialise();
 
    // Initialise the interrupt descriptor table.
    log::info!("Initialising interrupt descriptor table!");
@@ -57,7 +57,7 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
    tasks::add_future(async{
       let number = example(4).await;
-      println!("{}", number);
+      print!("{}", number);
    });
 
    //tasks::add_future(tasks::keyboard::print_keypresses());

@@ -1,7 +1,7 @@
 pub static DOUBLE_FAULT_IST_INDEX: u16 = 0;
 
 pub static mut TSS: TaskStateSegment = {
-   let mut tss = TaskStateSegment::new();
+   let tss = TaskStateSegment::new();
    tss
 };
 
@@ -11,7 +11,7 @@ pub static mut GDT: GlobalDescriptorTable = {
    gdt
 };
 
-pub fn initGDT() {
+pub fn initialise() {
    unsafe {
       TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] = {
          const STACK_SIZE: usize = 4096 * 5;
