@@ -60,6 +60,9 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
       println!("{}", number);
    });
 
+   //tasks::add_future(tasks::keyboard::print_keypresses());
+   //Keyboard input still not working properly :(
+
    tasks::run_tasks(); // works now! :D
 
    hlt_loop();
