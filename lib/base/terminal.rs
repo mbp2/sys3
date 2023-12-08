@@ -19,7 +19,7 @@ pub fn init_writer(
 
 pub struct LockedWriter {
    pub writer: Option<Spinlock<TerminalWriter>>,
-   pub serial: Option<Spinlock<SerialPort>>,
+   pub serial: Option<Spinlock<SerialPort<Pio<u8>>>>,
 }
 
 impl LockedWriter {
@@ -29,11 +29,7 @@ impl LockedWriter {
       writer_log_status: bool,
       serial_log_status: bool,
    ) -> Self {
-      let port = unsafe {
-         let mut serial = SerialPort::new(0x3F8);
-         serial.init();
-         serial
-      };
+      let port = unsafe { SerialPort::new(0x3F8) };
 
       let writer = match writer_log_status {
          true => Some(Spinlock::new(TerminalWriter::new(buffer, info))),
@@ -157,11 +153,14 @@ pub mod framebuffer;
 // IMPORTS //
 
 use {
-   crate::uart::SerialPort,
+   crate::{
+      uart::SerialPort,
+      syscall::pio::Pio,
+   },
    self::framebuffer::TerminalWriter,
    conquer_once::spin::OnceCell,
    core::fmt::{self, Write},
    log::LevelFilter,
    spinning_top::Spinlock,
-   springboard_api::info::{FrameBufferInfo, PixelFormat},
+   springboard_api::info::FrameBufferInfo,
 };
