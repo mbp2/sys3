@@ -197,14 +197,7 @@ use {
       cmp::{min, max},
       fmt::{Debug, Formatter, Result as FmtResult},
       mem::size_of,
-      ops::Deref,
       ptr::NonNull,
    },
    spin::Mutex,
-   x86_64::{
-      structures::paging::{
-         mapper::MapToError, FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB,
-      },
-      VirtAddr,
-   },
 };

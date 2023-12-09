@@ -11,7 +11,7 @@ impl VirtualAddressOffset {
       return VirtualAddressOffset(offset);
    }
 
-   pub fn Offset(&self) -> i128 {
+   pub fn offset(&self) -> i128 {
       return self.0;
    }
 }

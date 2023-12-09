@@ -145,10 +145,7 @@ use {
       CHAR_RASTER_WIDTH,
       FONT_WEIGHT,
    },
-   crate::uart::SerialPort,
-   conquer_once::spin::OnceCell,
    core::{fmt::{self, Write}, ptr},
    noto_sans_mono_bitmap::{RasterizedChar, get_raster},
-   spinning_top::Spinlock,
    springboard_api::info::{FrameBufferInfo, PixelFormat},
 };

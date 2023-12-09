@@ -3,7 +3,7 @@
 /// We label the mmio function unsafe since
 /// we will be working with raw memory. Rust cannot
 /// make any guarantees when we do this.
-pub unsafe fn Write(address: usize, offset: usize, value: u8) {
+pub unsafe fn write(address: usize, offset: usize, value: u8) {
    // Set the pointer based off of the address
    let register = address as *mut u8;
 
@@ -20,7 +20,7 @@ pub unsafe fn Write(address: usize, offset: usize, value: u8) {
 /// We label the mmio function unsafe since
 /// we will be working with raw memory. Rust cannot
 /// make any guarantees when we do this.
-pub unsafe fn Read(address: usize) -> Optional<u8> {
+pub unsafe fn read(address: usize) -> Optional<u8> {
    // Set the pointer based off of the address
    let register = address as *mut u8;
 

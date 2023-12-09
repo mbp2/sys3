@@ -4,3 +4,7 @@ pub fn make_syscall(call: usize) {}
 
 /// Implements a generic PIO interface.
 pub mod pio;
+
+// EXPORTS //
+
+pub use self::pio::Pio;

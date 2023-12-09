@@ -136,6 +136,9 @@ impl<T: ?Sized + Unsize<U>, U: ?Sized, A: Allocator> CoerceUnsized<Unique<U, A>>
 
 impl<T: ?Sized, A: Allocator> Unpin for Unique<T, A> {}
 
+unsafe impl<T: ?Sized + Send, A: Allocator> Send for Unique<T, A> {}
+unsafe impl<T: ?Sized + Sync, A: Allocator> Sync for Unique<T, A> {}
+
 // IMPORTS //
 
 use {
