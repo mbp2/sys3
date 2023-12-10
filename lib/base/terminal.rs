@@ -117,7 +117,7 @@ macro_rules! println {
 }
 
 #[macro_export]
-pub macro clear_screen {
+pub macro clear {
    () => {
       if let Some(writer) = &$crate::terminal::GLOBAL_WRITER.get().unwrap().writer {
          let mut writer = writer.lock();
