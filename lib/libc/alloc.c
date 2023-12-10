@@ -1,9 +1,9 @@
-#include <alloc.h>
-#include <stdmem.h>
+#include "alloc.h"
+#include "stdmem.h"
 
 #define MAX_ALLOC_ALLOWED 20
 
-size_t _heap_size;
+extern size_t _heap_size;
 
 static uint32_t AllocatedNumber = 0;
 static uint32_t HeapBaseAddr = 0x0;
@@ -19,8 +19,8 @@ void* malloc(size_t size) {
 
    void* addr = NULL;
 
-   bool flag = false;
-   bool initial_flag = false;
+   int flag = FALSE;
+   int initial_flag = FALSE;
 
    AllocInfo temp_info = {0};
 
@@ -33,26 +33,26 @@ void* malloc(size_t size) {
          initial_gap = metadata_info[0].address - HeapBaseAddr;
 
          if (initial_gap >= size) {
-            initial_flag = true;
+            initial_flag = TRUE;
             break;
          } else {
             gap = metadata_info[index + 1].address - (metadata_info[index].address + metadata_info[index].size);
 
             if (gap >= size) {
-               flag = true;
+               flag = TRUE;
                break;
             }
          }
       }
    }
 
-   if (flag == true) { /* Get Index for allocating memory for case two. */
+   if (flag == TRUE) { /* Get Index for allocating memory for case two. */
       heap_index = ((metadata_info[index].address + metadata_info[index].size) - HeapBaseAddr);
 
       for (j = MAX_ALLOC_ALLOWED - 1; j > index + 1; j--) {
          memcpy(&metadata_info[j], &metadata_info[j - 1], sizeof(AllocInfo));
       }
-   } else if (initial_flag == true) { /* Get index for allocating memory for case three. */
+   } else if (initial_flag == TRUE) { /* Get index for allocating memory for case three. */
       heap_index = 0;
 
       for (j = MAX_ALLOC_ALLOWED - 1; j > index + 1; j--) {
@@ -74,5 +74,4 @@ void* malloc(size_t size) {
 }
 
 void free(void* pointer) {
-
 }
