@@ -54,3 +54,4 @@ dkms.conf
 # Misc
 .DS_Store
 /target
+zig-*
