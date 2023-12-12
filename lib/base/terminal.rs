@@ -17,12 +17,20 @@ pub fn init_writer(
    log::info!("Global writer/logger successfully initialised: {:?}", info);
 }
 
+/// Spinlock-based writer API.
 pub struct LockedWriter {
+   /// Our framebuffer-based terminal writer.
+   /// 
+   /// This uses the buffer set up for us by the bootloader, if enabled.
    pub writer: Option<Spinlock<TerminalWriter>>,
+
+   /// A serial port-based universal asychronous receiver-transmitter.
+   /// Sends bytes to the serial port, if enabled.
    pub serial: Option<Spinlock<SerialPort<Pio<u8>>>>,
 }
 
 impl LockedWriter {
+   /// Create a new instance of our [`Spinlock`]-protected writer.
    pub fn new(
       buffer: &'static mut [u8],
       info: FrameBufferInfo,
@@ -84,6 +92,7 @@ impl log::Log for LockedWriter {
 
 // MACROS //
 
+/// Prints the provided string, using one of the provided implementations in the GLOBAL_WRITER static.
 #[macro_export]
 macro_rules! print {
    ($($args:tt)+) => ({
@@ -101,6 +110,7 @@ macro_rules! print {
    });
 }
 
+/// Print the provided string, followed by a newline character.
 #[macro_export]
 macro_rules! println {
    () => ({
@@ -116,28 +126,13 @@ macro_rules! println {
    });
 }
 
-#[macro_export]
+/// Clear the terminal buffer.
 pub macro clear {
    () => {
       if let Some(writer) = &$crate::terminal::GLOBAL_WRITER.get().unwrap().writer {
          let mut writer = writer.lock();
          writer.clear();
       }
-   }
-}
-
-#[doc(hidden)]
-pub fn _print(args: fmt::Arguments) {
-   use core::fmt::Write;
-
-   if let Some(writer) = &GLOBAL_WRITER.get().unwrap().writer {
-      let mut writer = writer.lock();
-      writer.write_fmt(args).unwrap();
-   }
-
-   if let Some(serial) = &GLOBAL_WRITER.get().unwrap().serial {
-      let mut serial = serial.lock();
-      serial.write_fmt(args).unwrap();
    }
 }
 
@@ -159,7 +154,7 @@ use {
    },
    self::framebuffer::TerminalWriter,
    conquer_once::spin::OnceCell,
-   core::fmt::{self, Write},
+   core::fmt::Write,
    log::LevelFilter,
    spinning_top::Spinlock,
    springboard_api::info::FrameBufferInfo,

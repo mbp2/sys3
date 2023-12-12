@@ -2,7 +2,12 @@
 #![crate_name = "base"]
 #![allow(nonstandard_style)]
 #![warn(missing_docs, missing_abi)]
-#![feature(decl_macro, coerce_unsized, unsize)]
+#![feature(coerce_unsized)]
+#![feature(custom_test_frameworks)]
+#![feature(decl_macro)]
+#![feature(unsize)]
+#![reexport_test_harness_main="test_main"]
+#![test_runner(crate::test::test_runner)]
 #![no_std]
 
 // MODULES //
@@ -56,6 +61,9 @@ pub mod tasks;
 
 /// Facilities for interacting with standard input/output.
 pub mod terminal;
+
+/// Testing utilities.
+pub mod test;
 
 /// A pair of UART (universal asynchronous receiver-transmitter) implementations, one memory-mapped,
 /// and the other mapped to serial hardware.
