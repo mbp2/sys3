@@ -77,6 +77,8 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
 
    tasks::run_tasks(); // works now! :D
 
+   // Our test harness.
+   // Only called when running tests.
    #[cfg(test)]
    test_main();
 
