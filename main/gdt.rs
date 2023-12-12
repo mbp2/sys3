@@ -17,7 +17,7 @@ pub fn initialise() {
          const STACK_SIZE: usize = 4096 * 5;
          static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
 
-         let stack_start = VirtAddr::from_ptr(unsafe { &STACK });
+         let stack_start = VirtAddr::from_ptr(&STACK);
          let stack_end = stack_start + STACK_SIZE;
          stack_end
       };
@@ -26,14 +26,19 @@ pub fn initialise() {
 
       GDT.load();
    }
+
+   log::info!("Successfully initialised global descriptor table!");
 }
 
 // IMPORTS //
 
-use x86_64::{
-   VirtAddr,
-   structures::{
-      gdt::{GlobalDescriptorTable, Descriptor},
-      tss::TaskStateSegment,
-   },
+use {
+   base::log,
+   x86_64::{
+      VirtAddr,
+      structures::{
+         gdt::{GlobalDescriptorTable, Descriptor},
+         tss::TaskStateSegment,
+      },
+   }
 };

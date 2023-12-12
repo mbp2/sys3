@@ -1,5 +1,8 @@
 pub unsafe fn initialise(physical_offset: VirtAddr) -> OffsetPageTable<'static> {
    let l4table = active_l4_page_table(physical_offset);
+
+   log::info!("Got the level four page table.");
+
    return OffsetPageTable::new(l4table, physical_offset);
 }
 
@@ -34,6 +37,8 @@ pub fn build_heap(
 
       *heap = Some(blocks);
    }
+
+   log::info!("Successfully initialised system heap.");
 
    return Ok(());
 }
@@ -125,7 +130,7 @@ unsafe impl FrameAllocator<Size4KiB> for SystemFrameAllocator {
 // IMPORTS //
 
 use {
-   base::alloc::heap::{HEAP, Heap, HEAP_SIZE, HEAP_START},
+   base::{alloc::heap::{HEAP, Heap, HEAP_SIZE, HEAP_START}, log},
    springboard_api::info::{
       MemoryRegion, MemoryRegionKind,
    },

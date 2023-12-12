@@ -8,24 +8,26 @@ pub fn initialise() {
 
       IDT.load();
    }
+
+   log::info!("Added interrupt handlers to the IDT");
 }
 
 extern "x86-interrupt" fn breakpoint(frame: InterruptStackFrame) {
-   println!("EXCEPTION: BREAKPOINT\n{:#?}", frame);
+   log::error!("EXCEPTION: BREAKPOINT\n{:#?}", frame);
 }
 
 extern "x86-interrupt" fn double_fault(frame: InterruptStackFrame, _: u64) -> ! {
-   println!("EXCEPTION: DOUBLE FAULT\n{:#?}", frame);
+   log::error!("EXCEPTION: DOUBLE FAULT\n{:#?}", frame);
    loop{}
 }
 
 extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, code: PageFaultErrorCode) {
    use x86_64::registers::control::Cr2;
 
-   println!("EXCEPTION: PAGE FAULT");
-   println!("Accessed address: {:?}", Cr2::read());
-   println!("Error code: {:?}", code);
-   println!("{:#?}", frame);
+   log::error!("EXCEPTION: PAGE FAULT");
+   log::error!("Accessed address: {:?}", Cr2::read());
+   log::error!("Error code: {:?}", code);
+   log::error!("{:#?}", frame);
 
    loop{}
 }
@@ -33,6 +35,7 @@ extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, code: PageFault
 // IMPORTS //
 
 use {
+   base::log,
    x86_64::structures::idt::{
       InterruptDescriptorTable, InterruptStackFrame,
       PageFaultErrorCode,
