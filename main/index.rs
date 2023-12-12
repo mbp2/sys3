@@ -1,13 +1,13 @@
 #![allow(nonstandard_style)]
-#![feature(
-abi_x86_interrupt,
-allocator_api,
-alloc_error_handler,
-async_closure,
-cfg_match,
-const_mut_refs,
-panic_info_message,
-)]
+#![feature(abi_x86_interrupt)]
+#![feature(allocator_api)]
+#![feature(alloc_error_handler)]
+#![feature(async_closure)]
+#![feature(cfg_match)]
+#![feature(const_mut_refs)]
+#![feature(custom_test_frameworks)]
+#![feature(panic_info_message)]
+#![test_runner(base::test::test_runner)]
 #![no_main]
 #![no_std]
 
@@ -64,6 +64,9 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    //Keyboard input still not working properly :(
 
    tasks::run_tasks(); // works now! :D
+
+   #[cfg(test)]
+   base::test_main();
 
    hlt_loop();
 }
@@ -137,6 +140,9 @@ pub mod memory;
 /// Kernel-level process management.
 pub mod process;
 
+#[cfg(test)]
+pub mod tests;
+
 // IMPORTS //
 
 extern crate alloc;
@@ -146,11 +152,9 @@ extern crate springboard_api;
 extern crate x86_64;
 
 use {
-   crate::{
-      memory::SystemFrameAllocator
-   },
+   crate::memory::SystemFrameAllocator,
    base::{log, tasks, terminal},
    core::panic::PanicInfo,
    springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
-   x86_64::{VirtAddr},
+   x86_64::VirtAddr,
 };
