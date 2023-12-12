@@ -23,6 +23,8 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 
 /// System entry point.
 pub fn Main(info: &'static mut BootInfo) -> ! {
+   unsafe{ base::arch::x86_64::BOOT_INFO = Some(info) };
+
    // Initialise logging facilities.
    let framebuffer = info.framebuffer.clone();
    let fb_info = framebuffer.as_ref().unwrap().info();
@@ -132,6 +134,9 @@ springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 
+/// Important memory addresses, address-space utilities.
+pub mod address;
+
 /// Architecture-specific code.
 pub mod arch;
 
@@ -164,6 +169,7 @@ extern crate acpi;
 #[macro_use] extern crate base;
 extern crate springboard_api;
 extern crate x86_64;
+
 
 use {
    crate::memory::SystemFrameAllocator,

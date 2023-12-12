@@ -1035,6 +1035,7 @@ dependencies = [
  "acpi",
  "springboard-api",
  "trident3-base",
+ "x86",
  "x86_64",
 ]
 
