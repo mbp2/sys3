@@ -7,6 +7,7 @@
 #![feature(const_mut_refs)]
 #![feature(custom_test_frameworks)]
 #![feature(panic_info_message)]
+#![reexport_test_harness_main="test_main"]
 #![test_runner(base::test::test_runner)]
 #![no_main]
 #![no_std]
@@ -45,11 +46,22 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    };
 
    log::info!("Building the heap!");
-   memory::build_heap(&mut mapper, &mut frame_allocator)
-      .expect("failed to initialise heap");
+   memory::build_heap(&mut mapper, &mut frame_allocator).expect("failed to initialise heap");
 
+   // Check CPU architecture and perform the proper initialisation.
+   log::info!("Checking CPU architecture...");
+   
    #[cfg(target_arch = "x86_64")]
    arch::x86_64::initialise_platform();
+
+   #[cfg(target_arch = "riscv64")]
+   arch::riscv::initialise_platform();
+
+   #[cfg(target_arch = "aarch64")]
+   arch::aarch64::initialise_platform();
+
+   // Example multitasking
+   log::info!("Checking runtime multitasking...");
 
    async fn example(number: u32) -> u32 {
       number + 1
@@ -66,7 +78,7 @@ pub fn Main(info: &'static mut BootInfo) -> ! {
    tasks::run_tasks(); // works now! :D
 
    #[cfg(test)]
-   base::test_main();
+   test_main();
 
    hlt_loop();
 }
