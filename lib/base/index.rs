@@ -24,10 +24,15 @@ pub mod array;
 pub mod error;
 
 /// TODO: document `external` module.
-pub mod externs;
+pub mod external;
 
 /// TODO: document `io` module.
 pub mod io;
+
+/*
+/// A simple JSON parser, lexer, and utility functions.
+pub mod json;
+*/
 
 /// TODO: document `math` module.
 pub mod math;
