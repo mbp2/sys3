@@ -132,6 +132,26 @@ pub fn hlt_loop() -> ! {
 
 springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
 
+// IMPORTS //
+
+extern crate alloc;
+extern crate acpi;
+#[macro_use] extern crate base;
+extern crate springboard_api;
+extern crate x86_64;
+
+use core::ops::Deref;
+use {
+   crate::memory::SystemFrameAllocator,
+   base::{
+      arch::x86_64::kernel::gdt,
+      log, tasks, terminal
+   },
+   core::panic::PanicInfo,
+   springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
+   x86_64::VirtAddr,
+};
+
 // MODULES //
 
 /// Important memory addresses, address-space utilities.
@@ -140,10 +160,12 @@ pub mod address;
 /// Architecture-specific code.
 pub mod arch;
 
+/*
 /// The Global Descriptor Table (GDT) is a relic that was used for memory segmentation before
 /// paging became the de facto standard. However, it is still needed in 64-bit mode for various
 /// things, such as kernel/user mode configuration or TSS loading.
 pub mod gdt;
+*/
 
 /// CPU exception handling.
 ///
@@ -161,20 +183,3 @@ pub mod process;
 
 #[cfg(test)]
 pub mod tests;
-
-// IMPORTS //
-
-extern crate alloc;
-extern crate acpi;
-#[macro_use] extern crate base;
-extern crate springboard_api;
-extern crate x86_64;
-
-use core::ops::Deref;
-use {
-   crate::memory::SystemFrameAllocator,
-   base::{log, tasks, terminal},
-   core::panic::PanicInfo,
-   springboard_api::{BootInfo, BootloaderConfig, config::Mapping},
-   x86_64::VirtAddr,
-};
