@@ -3,6 +3,7 @@
 #![allow(nonstandard_style)]
 #![warn(missing_docs, missing_abi)]
 #![feature(coerce_unsized)]
+#![feature(const_mut_refs)]
 #![feature(custom_test_frameworks)]
 #![feature(decl_macro)]
 #![feature(naked_functions)]
@@ -61,6 +62,9 @@ pub mod process;
 /// [`String`][crate::string::String]: A growable UTF-8 string.
 #[cfg(feature = "allocators")]
 pub mod string;
+
+/// Synchronisation primitives.
+pub mod sync;
 
 /// Facilities for handling low-level system calls.
 pub mod syscall;

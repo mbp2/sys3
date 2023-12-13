@@ -85,13 +85,13 @@ impl<T> Pendable for Arc<Task<T>> {
 /// Terminate the currently running task.
 pub fn do_exit() -> ! {
    log::info!("Task terminated");
+   //TODO: properly terminate the task.
    loop{}
 }
 
 // MODULES //
 
-/// Task control block.
-pub mod control;
+/// An async runtime executor.
 pub mod executor;
 pub mod keyboard;
 

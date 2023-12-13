@@ -77,6 +77,12 @@ impl Drop for Task {
    }
 }
 
+impl TaskFrame for Task {
+   fn create_stack_frame(&mut self, func: extern "C" fn()) {
+      //TODO: implement stack frame creation for tasks.
+   }
+}
+
 #[repr(C)]
 #[repr(align(64))]
 #[derive(Clone, Copy)]

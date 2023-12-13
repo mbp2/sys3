@@ -49,4 +49,8 @@ use {
 
 // MODULES //
 
+/// Kernel management functions.
+pub mod kernel;
+
+/// x86_64-specific memory management.
 pub mod memory;
