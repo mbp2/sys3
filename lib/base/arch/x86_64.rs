@@ -2,7 +2,7 @@ pub static mut BOOT_INFO: Option<&'static BootInfo> = None;
 
 pub fn get_boot_stack() -> BootStack {
    unsafe{
-      let regions = BOOT_INFO.expect("get bootinfo from bootloader").memory_regions.deref();
+      let regions = BOOT_INFO.expect("get boot info from bootloader").memory_regions.deref();
 
       for index in regions {
          if index.kind == MemoryRegionKind::Usable {

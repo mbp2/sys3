@@ -22,13 +22,13 @@ impl Scheduler {
 
       tasks.lock().insert(tid, idle_task.clone());
 
-      Scheduler {
+      return Scheduler{
          current_task: idle_task.clone(),
          idle_task: idle_task.clone(),
          ready_queue: SpinlockIrqSave::new(PriorityTaskQueue::new()),
          finished_tasks: SpinlockIrqSave::new(VecDeque::<TaskId>::new()),
          tasks: tasks,
-      }
+      };
    }
 
    fn get_tid(&self) -> TaskId {
@@ -65,7 +65,7 @@ impl Scheduler {
          Ok(tid)
       };
 
-      irqsave(closure)
+      return irqsave(closure);
    }
 
    fn cleanup(&mut self) {
@@ -126,7 +126,7 @@ impl Scheduler {
          }
       };
 
-      irqsave(closure)
+      return irqsave(closure);
    }
 
    pub fn wakeup_task(&mut self, task: Rc<RefCell<Task>>) {
