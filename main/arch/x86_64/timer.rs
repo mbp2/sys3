@@ -14,5 +14,5 @@ pub unsafe fn wait_100k() {
 
 use {
    base::syscall::*,
-   x86::{io::*, time::rdtsc}
+   x86::{time::rdtsc}
 };

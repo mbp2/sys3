@@ -40,7 +40,7 @@ pub fn initialise_platform() {
 // IMPORTS //
 
 use {
-   self::{syscall::*, timer::*},
+   self::{timer::*},
    base::{
       log,
       uart::COM2,

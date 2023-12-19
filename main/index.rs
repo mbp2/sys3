@@ -170,7 +170,7 @@ extern crate acpi;
 extern crate springboard_api;
 extern crate x86_64;
 
-use core::ops::Deref;
+
 use {
    crate::memory::SystemFrameAllocator,
    base::{log, tasks, terminal},
