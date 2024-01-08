@@ -5,6 +5,7 @@
 #![feature(coerce_unsized)]
 #![feature(custom_test_frameworks)]
 #![feature(decl_macro)]
+#![feature(naked_functions)]
 #![feature(unsize)]
 #![reexport_test_harness_main="test_main"]
 #![test_runner(crate::test::test_runner)]
@@ -19,6 +20,11 @@ pub mod alloc;
 /// TODO: document `array` module.
 #[cfg(feature = "allocators")]
 pub mod array;
+
+/// TODO: document `arch` module.
+///
+/// Architecture-specific functions.
+pub mod arch;
 
 /// TODO: document `error` module.
 pub mod error;
