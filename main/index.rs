@@ -22,7 +22,7 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
 };
 
 /// System entry point.
-pub fn Main(info: &'static mut BootInfo) -> ! {
+pub fn main(info: &'static mut BootInfo) -> ! {
    // Initialise logging facilities.
    let framebuffer = info.framebuffer.clone();
    let fb_info = framebuffer.as_ref().unwrap().info();
@@ -128,7 +128,7 @@ pub fn hlt_loop() -> ! {
    }
 }
 
-springboard_api::start!(Main, config = &BOOTLOADER_CONFIG);
+springboard_api::start!(main, config = &BOOTLOADER_CONFIG);
 
 // MODULES //
 
