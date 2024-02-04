@@ -18,6 +18,7 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
    config.mappings.framebuffer = Mapping::FixedAddress(0x8000000);
    config.mappings.physical_memory = Some(Mapping::Dynamic);
    config.mappings.page_table_recursive = Some(Mapping::Dynamic);
+   // TODO: write out the other necessary memory mappings.
    config
 };
 
